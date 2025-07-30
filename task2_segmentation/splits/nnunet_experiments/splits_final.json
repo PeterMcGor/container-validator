@@ -1,0 +1,117 @@
+[
+    {
+        "train": [
+            "sub_10",
+            "sub_11",
+            "sub_14",
+            "sub_16",
+            "sub_17",
+            "sub_18",
+            "sub_19",
+            "sub_2",
+            "sub_20",
+            "sub_5",
+            "sub_6",
+            "sub_7",
+            "sub_8"
+        ],
+        "val": [
+            "sub_1",
+            "sub_21",
+            "sub_22",
+            "sub_3"
+        ]
+    },
+    {
+        "train": [
+            "sub_1",
+            "sub_10",
+            "sub_11",
+            "sub_16",
+            "sub_17",
+            "sub_20",
+            "sub_21",
+            "sub_22",
+            "sub_3",
+            "sub_5",
+            "sub_6",
+            "sub_7",
+            "sub_8"
+        ],
+        "val": [
+            "sub_14",
+            "sub_18",
+            "sub_19",
+            "sub_2"
+        ]
+    },
+    {
+        "train": [
+            "sub_1",
+            "sub_10",
+            "sub_11",
+            "sub_14",
+            "sub_16",
+            "sub_17",
+            "sub_18",
+            "sub_19",
+            "sub_2",
+            "sub_20",
+            "sub_21",
+            "sub_22",
+            "sub_3",
+            "sub_5"
+        ],
+        "val": [
+            "sub_6",
+            "sub_7",
+            "sub_8"
+        ]
+    },
+    {
+        "train": [
+            "sub_1",
+            "sub_11",
+            "sub_14",
+            "sub_17",
+            "sub_18",
+            "sub_19",
+            "sub_2",
+            "sub_21",
+            "sub_22",
+            "sub_3",
+            "sub_5",
+            "sub_6",
+            "sub_7",
+            "sub_8"
+        ],
+        "val": [
+            "sub_10",
+            "sub_16",
+            "sub_20"
+        ]
+    },
+    {
+        "train": [
+            "sub_1",
+            "sub_10",
+            "sub_14",
+            "sub_16",
+            "sub_18",
+            "sub_19",
+            "sub_2",
+            "sub_20",
+            "sub_21",
+            "sub_22",
+            "sub_3",
+            "sub_6",
+            "sub_7",
+            "sub_8"
+        ],
+        "val": [
+            "sub_11",
+            "sub_17",
+            "sub_5"
+        ]
+    }
+]
