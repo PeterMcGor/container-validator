@@ -1,14 +1,137 @@
+import json
 import os
-import subprocess
 import shutil
+import subprocess
 import tempfile
-import SimpleITK as sitk
-from batchgenerators.utilities.file_and_folder_operations import join, save_json
 from typing import Tuple
-import pandas as pd
 
 import nibabel as nib
+import pandas as pd
+import SimpleITK as sitk
+from batchgenerators.utilities.file_and_folder_operations import join, save_json
 
+
+import json
+import os
+import pandas as pd
+
+def read_json_as_dict(jsonFile: str) -> dict:
+    with open(jsonFile) as jsonFile:
+        jsonObject = json.load(jsonFile)
+        jsonFile.close()
+    return jsonObject
+
+class nnUNetSumReader:
+    def __init__(self, jsonFile: str):
+        self.json_file = jsonFile
+             
+    @property
+    def json_file(self):
+        return self._json_file
+ 
+    @json_file.setter
+    def json_file(self, jsonFile):
+        assert os.path.exists(jsonFile), f"File {jsonFile} does not exist"
+        self._json_file = jsonFile
+        self.json_dict = read_json_as_dict(self.json_file)
+        
+        # Check for new JSON structure (has metric_per_case)
+        if 'metric_per_case' in self.json_dict.keys():
+            self._parse_new_format()
+        # Check for old JSON structure (has results)
+        elif 'results' in self.json_dict.keys():
+            self._parse_old_format()
+        else:
+            raise ValueError("Unknown JSON format: expected either 'metric_per_case' or 'results' key")
+    
+    def _parse_new_format(self):
+        """Parse the new nnUNet evaluation format"""
+        self.results = []
+        metric_per_case = self.json_dict['metric_per_case']
+        
+        for case_data in metric_per_case:
+            # Extract file paths
+            ref_file = case_data.get('reference_file', '')
+            pred_file = case_data.get('prediction_file', '')
+            
+            # Extract metrics for each label
+            metrics_dict = case_data.get('metrics', {})
+            for label, metrics in metrics_dict.items():
+                case_result = {
+                    'ref': ref_file,
+                    'tst': pred_file,
+                    'label': label
+                }
+                # Add all metric values
+                case_result.update(metrics)
+                self.results.append(case_result)
+    
+    def _parse_old_format(self):
+        """Parse the old nnUNet evaluation format"""
+        results_dct = self.json_dict['results']['all']
+        self.results = []
+        
+        for evaluation in results_dct:
+            ref_tst = {'ref': evaluation['reference'], 'tst': evaluation['test']}
+            evaluation_labels = evaluation.copy()
+            [evaluation_labels.pop(k) for k in ['reference', 'test']]
+            
+            for label, metrics in evaluation_labels.items():
+                ref_tst['label'] = label
+                self.results.append({**ref_tst, **{m: val for m, val in metrics.items()}})
+                     
+    def get_data_frame(self) -> pd.DataFrame:
+        return pd.DataFrame(self.results)
+                     
+    def get_csv(self, csv_path):
+        self.get_data_frame().to_csv(csv_path, index=False)
+             
+    def __str__(self):
+        return f"{self.json_file} (Results: {len(self.results)})"
+
+    def get_summary_stats(self):
+        """Get summary statistics from the JSON (if available)"""
+        summary = {}
+        if 'foreground_mean' in self.json_dict:
+            summary['foreground_mean'] = self.json_dict['foreground_mean']
+        if 'mean' in self.json_dict:
+            summary['mean'] = self.json_dict['mean']
+        return summary
+    
+    def get_summary_dataframe(self) -> pd.DataFrame:
+        """Convert summary statistics to DataFrame format"""
+        summary_results = []
+        
+        # Add foreground_mean metrics if available
+        if 'foreground_mean' in self.json_dict:
+            foreground_data = self.json_dict['foreground_mean'].copy()
+            foreground_data['metric_type'] = 'foreground_mean'
+            foreground_data['label'] = 'all'
+            summary_results.append(foreground_data)
+        
+        # Add mean metrics by label if available
+        if 'mean' in self.json_dict:
+            mean_data = self.json_dict['mean']
+            for label, metrics in mean_data.items():
+                label_data = metrics.copy()
+                label_data['metric_type'] = 'mean'
+                label_data['label'] = label
+                summary_results.append(label_data)
+        
+        return pd.DataFrame(summary_results)
+    
+    def get_summary_csv(self, csv_path):
+        """Export summary statistics to CSV"""
+        summary_df = self.get_summary_dataframe()
+        summary_df.to_csv(csv_path, index=False)
+        
+    def export_both_csvs(self, per_case_csv_path, summary_csv_path):
+        """Export both per-case results and summary statistics to separate CSVs"""
+        # Export per-case results
+        self.get_csv(per_case_csv_path)
+        
+        # Export summary statistics
+        self.get_summary_csv(summary_csv_path)
 
 def cast_label_image_to_int(label_image: sitk.Image) -> sitk.Image:
     """
