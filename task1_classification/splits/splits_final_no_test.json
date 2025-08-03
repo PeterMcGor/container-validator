@@ -1,0 +1,137 @@
+[
+    {
+        "train": [
+            "sub_10",
+            "sub_11",
+            "sub_13",
+            "sub_14",
+            "sub_16",
+            "sub_18",
+            "sub_19",
+            "sub_2",
+            "sub_20",
+            "sub_21",
+            "sub_3",
+            "sub_5",
+            "sub_6",
+            "sub_7",
+            "sub_8",
+            "sub_9"
+        ],
+        "val": [
+            "sub_1",
+            "sub_12",
+            "sub_15",
+            "sub_17",
+            "sub_4"
+        ]
+    },
+    {
+        "train": [
+            "sub_1",
+            "sub_10",
+            "sub_11",
+            "sub_12",
+            "sub_14",
+            "sub_15",
+            "sub_16",
+            "sub_17",
+            "sub_19",
+            "sub_2",
+            "sub_20",
+            "sub_21",
+            "sub_4",
+            "sub_5",
+            "sub_6",
+            "sub_7",
+            "sub_9"
+        ],
+        "val": [
+            "sub_13",
+            "sub_18",
+            "sub_3",
+            "sub_8"
+        ]
+    },
+    {
+        "train": [
+            "sub_1",
+            "sub_10",
+            "sub_12",
+            "sub_13",
+            "sub_14",
+            "sub_15",
+            "sub_16",
+            "sub_17",
+            "sub_18",
+            "sub_19",
+            "sub_20",
+            "sub_21",
+            "sub_3",
+            "sub_4",
+            "sub_5",
+            "sub_6",
+            "sub_8"
+        ],
+        "val": [
+            "sub_11",
+            "sub_2",
+            "sub_7",
+            "sub_9"
+        ]
+    },
+    {
+        "train": [
+            "sub_1",
+            "sub_11",
+            "sub_12",
+            "sub_13",
+            "sub_14",
+            "sub_15",
+            "sub_17",
+            "sub_18",
+            "sub_19",
+            "sub_2",
+            "sub_21",
+            "sub_3",
+            "sub_4",
+            "sub_6",
+            "sub_7",
+            "sub_8",
+            "sub_9"
+        ],
+        "val": [
+            "sub_10",
+            "sub_16",
+            "sub_20",
+            "sub_5"
+        ]
+    },
+    {
+        "train": [
+            "sub_1",
+            "sub_10",
+            "sub_11",
+            "sub_12",
+            "sub_13",
+            "sub_15",
+            "sub_16",
+            "sub_17",
+            "sub_18",
+            "sub_2",
+            "sub_20",
+            "sub_3",
+            "sub_4",
+            "sub_5",
+            "sub_7",
+            "sub_8",
+            "sub_9"
+        ],
+        "val": [
+            "sub_14",
+            "sub_19",
+            "sub_21",
+            "sub_6"
+        ]
+    }
+]
