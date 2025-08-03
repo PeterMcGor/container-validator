@@ -29,9 +29,7 @@ def create_nnUNet_folder_struct(main_dataset_folder:str):
 
 if __name__ == '__main__':
     import glob
-    #main_img_bids_path = '/media/chuv2/CL-Mock-BIDS/'
     main_img_split_path = '/media/secondary/fomo-fine-tuning-datasets/fomo-task2/'
-    #main_lbl_path = '/media/chuv2/MSSeg/data/split4/'
     splits_csv = '/media/secondary/fomo-fine-tuning-datasets/fomo-task2/meningioma_train_test_splits_bins-3_seed-42.csv'
     skull_stripping = False
     dataset_name = 'Dataset499_FOMO-Men_No-SK_FL-DWI'  

@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import json
 from sklearn.model_selection import train_test_split, StratifiedKFold
 from sklearn.preprocessing import KBinsDiscretizer
 
@@ -188,6 +189,101 @@ def flexible_stratified_split(df,
         print(f"Test unique groups: {len(test_groups)}")
     
     return train_df, test_df
+
+
+
+def create_nnunet_splits_from_csv(csv_filepath, output_filepath='splits_final.json'):
+    """
+    Create a splits_final.json file from a CSV with cv_fold information.
+    
+    Parameters:
+    csv_filepath (str): Path to the input CSV file
+    output_filepath (str): Path for the output JSON file
+    
+    Returns:
+    list: The splits data structure
+    """
+    
+    # Read the CSV file
+    df = pd.read_csv(csv_filepath)
+    
+    # Get unique fold values and sort them
+    unique_folds = sorted(df['cv_fold'].unique())
+    
+    # Initialize the splits list
+    splits = []
+    
+    # For each fold, create train/val split
+    for fold in unique_folds:
+        # Subjects in current fold go to validation
+        val_subjects = df[df['cv_fold'] == fold]['subject_id'].tolist()
+        
+        # All other subjects go to training
+        train_subjects = df[df['cv_fold'] != fold]['subject_id'].tolist()
+        
+        # Sort the lists for consistency
+        val_subjects.sort()
+        train_subjects.sort()
+        
+        # Create the fold dictionary
+        fold_dict = {
+            "train": train_subjects,
+            "val": val_subjects
+        }
+        
+        splits.append(fold_dict)
+    
+    # Save to JSON file
+    with open(output_filepath, 'w') as f:
+        json.dump(splits, f, indent=4)
+    
+    # Print summary
+    print(f"Created {len(splits)} folds:")
+    for i, split in enumerate(splits):
+        print(f"Fold {i}: {len(split['train'])} train, {len(split['val'])} val subjects")
+        print(f"  Val subjects: {split['val']}")
+    
+    print(f"\nSplits saved to: {output_filepath}")
+    
+    return splits
+
+def validate_splits(splits, csv_filepath):
+    """
+    Validate that the splits cover all subjects correctly.
+    
+    Parameters:
+    splits (list): The splits data structure
+    csv_filepath (str): Path to the original CSV file
+    """
+    
+    df = pd.read_csv(csv_filepath)
+    all_subjects = set(df['subject_id'].unique())
+    
+    print(f"\nValidation:")
+    print(f"Total subjects in CSV: {len(all_subjects)}")
+    
+    for i, split in enumerate(splits):
+        train_set = set(split['train'])
+        val_set = set(split['val'])
+        
+        # Check no overlap between train and val
+        overlap = train_set.intersection(val_set)
+        if overlap:
+            print(f"❌ Fold {i}: Overlap found - {overlap}")
+        else:
+            print(f"✅ Fold {i}: No overlap between train/val")
+        
+        # Check all subjects are covered
+        fold_subjects = train_set.union(val_set)
+        if fold_subjects == all_subjects:
+            print(f"✅ Fold {i}: All subjects covered")
+        else:
+            missing = all_subjects - fold_subjects
+            extra = fold_subjects - all_subjects
+            if missing:
+                print(f"❌ Fold {i}: Missing subjects - {missing}")
+            if extra:
+                print(f"❌ Fold {i}: Extra subjects - {extra}")
 
 
 if __name__ == "__main__":
