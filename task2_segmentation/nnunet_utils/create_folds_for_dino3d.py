@@ -213,7 +213,7 @@ def create_both_experiments_from_splits(
     base_output_dir: str,
     extracted_data_dir: str,
     experiment1_name: str = "2channel_dwi_flair",
-    experiment2_name: str = "3channel_dwi_flair_t2star",
+    experiment2_name: str = "3channel_dwi_flair_swi/t2star",
     file_prefix: str = "FOMO2_sub_",
     use_val_as_test: bool = True,
     subject_id_column: str = "subject_id",
@@ -485,16 +485,16 @@ def extract_subject_id(nnunet_case_name: str) -> str:
 # Example usage
 if __name__ == "__main__":
     # Example paths - update according to your setup
-    preprocessed_data = "/path/to/preprocessed/data"
-    splits_input = "splits_final.json"  # Can be either JSON or CSV file
-    output_directory = "./dino_datasets/fomo_experiments"
-    extracted_directory = "/path/to/extracted/modalities"
+    preprocessed_data = "/home/jovyan/shared/pedro-maciasgordaliza/fomo25/finetuning_data_preprocess/mimic-pretreaining-preprocessing/Task002_FOMO2"
+    splits_input = "/home/jovyan/workspace/container-validator/task2_segmentation/splits/nnunet_experiments/splits_final_no_test.json"  # Can be either JSON or CSV file
+    output_directory = "/home/jovyan/workspace/container-validator/task2_segmentation/splits/dino_experiments/"
+    extracted_directory = "/home/jovyan/shared/pedro-maciasgordaliza/fomo25/finetuning_data_preprocess/mimic-pretreaining-preprocessing/Task002_FOMO2_extracted_modalities"
     
     # Default FOMO modality configuration
     fomo_modalities = {
         0: {"name": "dwi", "description": "DWI (Diffusion Weighted Imaging)"},
         1: {"name": "flair", "description": "T2FLAIR"},
-        2: {"name": "t2star", "description": "SWI_OR_T2STAR (Susceptibility Weighted Imaging or T2*)"},
+        2: {"name": "swi", "description": "SWI_OR_T2STAR (Susceptibility Weighted Imaging or T2*)"},
         3: {"name": "label", "description": "Segmentation Label"}
     }
     
@@ -510,11 +510,11 @@ if __name__ == "__main__":
     # Option 1: Use CSV file with default FOMO setup
     create_both_experiments_from_splits(
         preprocessed_data_path=preprocessed_data,
-        splits_source="cv_splits_bins-3_seed-42_no-test.csv",  # CSV file
+        splits_source=splits_input,  # CSV file
         base_output_dir=output_directory,
         extracted_data_dir=extracted_directory,
-        experiment1_name="fomo-task2_2channels_from_csv",
-        experiment2_name="fomo-task2_3channels_from_csv", 
+        experiment1_name="fomo-task2_2channels_no_test_mimic",
+        experiment2_name="fomo-task2_3channels_no_test_mimic", 
         file_prefix="FOMO2_sub_",
         use_val_as_test=True,
         extraction_strategy="if_missing",  # Only extract missing files
