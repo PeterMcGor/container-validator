@@ -88,6 +88,42 @@ def extract_label_stats(label_image: Union[str, sitk.Image], background_value: i
     
     return lesions_stats, summary_stats
 
+def extract_image_basics(image: Union[str, sitk.Image]) -> Dict[str, Any]:
+    """
+    Extract basic information about the image such as spacing, size, and datatype.
+
+    :param image: The input image, either as a SimpleITK Image object or a file path.
+    :type image: Union[str, sitk.Image]
+    :return: A dictionary containing the basic image information.
+    :rtype: Dict[str, Any]
+    """
+    # Read the image if a file path is provided
+    image = image if isinstance(image, sitk.Image) else sitk.ReadImage(image)
+
+    # Extract basic properties
+    spacing = image.GetSpacing()
+    size = image.GetSize()
+    direction = image.GetDirection()
+    origin = image.GetOrigin()
+    pixel_type = image.GetPixelIDTypeAsString()
+
+    # Create a dictionary with the extracted properties
+    image_basics = {
+        "Spacing_X": spacing[0],
+        "Spacing_Y": spacing[1],
+        "Spacing_Z": spacing[2] if len(spacing) > 2 else None,
+        "Size_X": size[0],
+        "Size_Y": size[1],
+        "Size_Z": size[2] if len(size) > 2 else None,
+        "Direction": direction,
+        "Origin_X": origin[0],
+        "Origin_Y": origin[1],
+        "Origin_Z": origin[2] if len(origin) > 2 else None,
+        "Pixel_Type": pixel_type,
+    }
+
+    return image_basics
+
 if __name__ == "__main__":
     import os
     import glob

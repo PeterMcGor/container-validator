@@ -101,8 +101,11 @@ def flexible_stratified_split(df,
     
     # Bin continuous variables
     if continuous_cols:
-        kbd = KBinsDiscretizer(n_bins=n_bins, encode='ordinal', strategy='quantile')
-        for col in continuous_cols:
+        if not isinstance(n_bins, list):
+            n_bins = [n_bins] * len(continuous_cols)
+        print("Binning continuous columns:", continuous_cols, "with n_bins:", n_bins)
+        for i,col in enumerate(continuous_cols):
+            kbd = KBinsDiscretizer(n_bins=n_bins[i], encode='ordinal', strategy='quantile')
             group_stats[f'{col}_bin'] = kbd.fit_transform(group_stats[[col]]).astype(int)
     
     # Create combined stratification label
