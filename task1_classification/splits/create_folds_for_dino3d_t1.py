@@ -14,7 +14,7 @@ if __name__ == "__main__":
 
     # Example paths - update according to your setup
     preprocessed_data = "/home/jovyan/shared/pedro-maciasgordaliza/fomo25/finetuning_data_preprocess/mimic-pretreaining-preprocessing/Task001_FOMO1"
-    splits_input = "/home/jovyan/workspace/container-validator/task2_segmentation/splits/nnunet_experiments/splits_final_no_test.json"  # Can be either JSON or CSV file
+    splits_input = "/home/jovyan/workspace/container-validator/task1_classification/splits/splits_final_no_test.json"  # Can be either JSON or CSV file
     output_directory = "/home/jovyan/workspace/container-validator/task1_classification/splits/dino_experiments/"
     extracted_directory = "/home/jovyan/shared/pedro-maciasgordaliza/fomo25/finetuning_data_preprocess/mimic-pretreaining-preprocessing/Task001_FOMO1_extracted_modalities"
        
@@ -38,9 +38,9 @@ if __name__ == "__main__":
         data_dir=preprocessed_data,
         output_dir=output_directory,
         extracted_data_dir=extracted_directory,
-        experiment_name="fomo-task1-4ch-mimic",
+        experiment_name="fomo-task1-3ch-mimic",
         file_prefix="FOMO1_sub_",
-        modality_info=task1_4ch_modalities,
+        modality_info=task1_3ch_modalities,
         label_extension=".txt",
         extraction_strategy="if_missing"
     )
