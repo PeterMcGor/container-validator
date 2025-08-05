@@ -1,6 +1,30 @@
 #!/usr/bin/env python3
 import argparse
 from pathlib import Path
+import numpy as np
+import torch
+import torch.nn.functional as F
+
+# from fomo25.src.inference.predict import load_modalities
+from fomo25.src.inference.predict import load_modalities
+from fomo25.src.data.task_configs import task1_config
+from fomo25.src.models.supervised_cls import SupervisedClsModel
+
+from yucca.functional.preprocessing import (
+    preprocess_case_for_inference,
+    reverse_preprocessing,
+)
+
+
+# Task-specific hardcoded configuration
+predict_config = {
+    # Import values from task_configs
+    **task1_config,
+    # Add inference-specific configs
+    "model_path": "/app/models/Task001_FOMO1/mmunetvae/version_0/checkpoints/best_model.ckpt",
+    "patch_size": (64, 64, 64),
+}
+
 
 def parse_args():
     """Parse command line arguments."""
@@ -52,8 +76,106 @@ def predict(args):
     #########################################################################
     
     # Dummy probability - REPLACE THIS WITH YOUR ACTUAL PREDICTION
-    probability = 0.75  # Example probability, should be between 0 and 1
+    # probability = 0.75  # Example probability, should be between 0 and 1
     
+    # NOTE: Remember the order [ preprocess task 1 ]
+    # if "dwi" in file:
+    #     modality_index = 0  # DWI
+    # elif "flair" in file:
+    #     modality_index = 1  # T2FLAIR
+    # elif "adc" in file:
+    #     modality_index = 2  # ADC
+    # elif "swi" in file or "t2s" in file:
+    #     modality_index = 3  # SWI_OR_T2STAR
+    # else:
+    #     continue
+
+    # Map arguments to modality paths in expected order from task 
+    if args.swi is not None:
+        modality_paths = [args.dwi_b1000, args.flair, args.adc, args.swi]
+    elif args.t2s is not None:
+        modality_paths = [args.dwi_b1000, args.flair, args.adc, args.t2s]
+    else:
+        raise ValueError("At least one of SWI or T2* must be provided")
+
+    # Load input images
+    images = load_modalities(modality_paths)
+
+    # Extract configuration parameters
+    task_type = predict_config["task_type"]
+    crop_to_nonzero = predict_config["crop_to_nonzero"]
+    norm_op = predict_config["norm_op"]
+    num_classes = predict_config["num_classes"]
+    keep_aspect_ratio = predict_config.get("keep_aspect_ratio", True)
+    patch_size = predict_config["patch_size"]
+    model_path = predict_config["model_path"]
+
+    # Define preprocessing parameters
+    normalization_scheme = [norm_op] * len(modality_paths)
+    target_spacing = [1.0, 1.0, 1.0]  # Isotropic 1mm spacing
+    target_orientation = "RAS"
+
+    # Apply preprocessing
+    case_preprocessed, case_properties = preprocess_case_for_inference(
+        crop_to_nonzero=crop_to_nonzero,
+        images=images,
+        intensities=None,  # Use default intensity normalization
+        normalization_scheme=normalization_scheme,
+        patch_size=patch_size,
+        target_size=None,  # We use target_spacing instead
+        target_spacing=target_spacing,
+        target_orientation=target_orientation,
+        allow_missing_modalities=False,
+        keep_aspect_ratio=keep_aspect_ratio,
+        transpose_forward=[0, 1, 2],  # Standard transpose order
+    )
+
+    # Load the model checkpoint directly with Lightning
+    model = SupervisedClsModel.load_from_checkpoint(checkpoint_path=model_path)    
+
+    # Set model to evaluation mode
+    model.eval()
+
+    # Get device
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = model.to(device)
+    case_preprocessed = case_preprocessed.to(device)
+
+    # Run inference
+    with torch.no_grad():
+       # Run the forward pass
+        overlap = 0.5  # Standard overlap for sliding window
+
+        # Get prediction
+        predictions = model.model.predict(
+            data=case_preprocessed,
+            mode="3D",
+            mirror=False,  # No test-time augmentation
+            overlap=overlap,
+            patch_size=patch_size,
+            sliding_window_prediction=True,
+            device=device,
+        )
+        
+    # For classification, apply softmax and take argmax        
+    pred_probs = F.softmax(predictions, dim=1)
+    pred_label = pred_probs.argmax().item()
+
+    # Probability of positive class (infarct presence)
+    # print(predictions)
+    # print(predictions.shape)
+    # print(pred_probs)
+    # print(pred_probs.shape)
+    probability = pred_probs[0][1].item()  # Assuming class 1 is positive
+
+    # predictions_softmax = torch.nn.functional.softmax(
+    #     torch.from_numpy(predictions_original), dim=1
+    # )
+    # prediction_final = torch.argmax(predictions_softmax, dim=1)[0].numpy()    
+
+    # Save the prediction
+    # save_prediction(prediction_final, images[0], output_path)
+
     return probability
 
 def main():
@@ -72,7 +194,11 @@ def main():
     with open(output_file, 'w') as f:
         f.write(f"{probability:.3f}")
 
-   
+    # # And the prediction label
+    # if probability >= 0.5:
+    #     prediction_label = "infarct"
+    # else:
+    #     prediction_label = "no_infarct"
     
     return 0
 
