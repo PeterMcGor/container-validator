@@ -395,7 +395,8 @@ class ContainerValidator:
 
                 # Check binary mask
                 unique_vals = np.unique(mask_img.get_fdata())
-                if not np.array_equal(unique_vals, [0.0, 1.0]):
+                if not np.all(np.isin(unique_vals, [0.0, 1.0])):
+                    print(f"[DEBUG] Unique values in mask {mask_file.name}: {unique_vals}")
                     return False, f"Non-binary mask for {subject_id}"
 
             except Exception as e:
