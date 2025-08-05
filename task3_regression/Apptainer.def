@@ -15,8 +15,12 @@ From: python:3.11-slim
 
 %files
     # Copy your files (model, predict.py, requirements.txt, ...) to the container
+    /media/jaume/DATA/Data/fomo25/fomo_apptainer_key /root/.ssh/id_ed25519
     ./predict.py /app/predict.py
     ./requirements.txt /app/requirements.txt
+
+    # Copy model
+    /media/jaume/DATA/Data/fomo25_models/Task003_FOMO3 /app/models/
 
 %post
     # Create necessary directories
@@ -24,16 +28,35 @@ From: python:3.11-slim
     
     # Update and install system dependencies
     apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
+        build-essential \
+        git \
+        openssh-client \
+        libglib2.0-0 \
+        libsm6 \
+        libxext6 \
+        libxrender1 \
+        libgtk2.0-dev \
+        libgl1 \
+        && rm -rf /var/lib/apt/lists/*
     
+    # Set up SSH
+    mkdir -p /root/.ssh
+    chmod 600 /root/.ssh/id_ed25519
+    ssh-keyscan github.com >> /root/.ssh/known_hosts
+
+    # Clone the private repo
+    git clone git@github.com:jbanusco/fomo25.git /app/fomo25
+
     # Install Python dependencies
     pip install --no-cache-dir -U pip setuptools wheel
+
+    # Install fomo25 as a Python package (assuming setup.py exists)
+    pip install --no-cache-dir /app/fomo25
     pip install --no-cache-dir -r /app/requirements.txt
     
     # Make predict.py executable
     chmod +x /app/predict.py
-
+    
 %runscript
     # Execute the prediction script with all arguments
     exec python /app/predict.py "$@"

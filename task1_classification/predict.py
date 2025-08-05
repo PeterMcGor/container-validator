@@ -5,7 +5,6 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-# from fomo25.src.inference.predict import load_modalities
 from fomo25.src.inference.predict import load_modalities
 from fomo25.src.data.task_configs import task1_config
 from fomo25.src.models.supervised_cls import SupervisedClsModel
