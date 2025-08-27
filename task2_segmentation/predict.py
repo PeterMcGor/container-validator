@@ -6,6 +6,7 @@ import argparse
 import nibabel as nib
 import numpy as np
 from pathlib import Path
+import scipy.ndimage as ndi
 
 import torch
 import torch.nn.functional as F
@@ -25,7 +26,13 @@ predict_config = {
     # Import values from task_configs
     **task2_config,
     # Add inference-specific configs
-    "model_path": "/app/models/Task002_FOMO2/mmunetvae/version_0/checkpoints/best_model.ckpt",
+    # "model_path": "/app/models/Task002_FOMO2/mmunetvae/version_0/checkpoints/best_model.ckpt",
+    "model_list": ["/app/models/Task002_FOMO2/mmunetvae/split_0/version_0/checkpoints/best_model.ckpt",
+                   "/app/models/Task002_FOMO2/mmunetvae/split_1/version_0/checkpoints/best_model.ckpt",
+                   "/app/models/Task002_FOMO2/mmunetvae/split_2/version_0/checkpoints/best_model.ckpt",
+                   "/app/models/Task002_FOMO2/mmunetvae/split_3/version_0/checkpoints/best_model.ckpt",
+                   "/app/models/Task002_FOMO2/mmunetvae/split_4/version_0/checkpoints/best_model.ckpt",
+                   ],
     "patch_size": (64, 64, 64),
 }
 
@@ -125,7 +132,7 @@ def predict_segmentation(args):
     num_classes = predict_config["num_classes"]
     keep_aspect_ratio = predict_config.get("keep_aspect_ratio", True)
     patch_size = predict_config["patch_size"]
-    model_path = predict_config["model_path"]
+    # model_path = predict_config["model_path"]
 
     # Define preprocessing parameters
     normalization_scheme = [norm_op] * len(modality_paths)
@@ -147,52 +154,78 @@ def predict_segmentation(args):
         transpose_forward=[0, 1, 2],  # Standard transpose order
     )
 
-    # Load the model checkpoint directly with Lightning
-    model = SupervisedSegModel.load_from_checkpoint(checkpoint_path=model_path)    
-
-    # Set model to evaluation mode
-    model.eval()
-
-    # Get device
+    accum_logits = None   # [B,C,D,H,W] on CPU
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = model.to(device)
     case_preprocessed = case_preprocessed.to(device)
+    # Load the model checkpoint directly with Lightning
+    for model_path in predict_config["model_list"]:
+        model = SupervisedSegModel.load_from_checkpoint(checkpoint_path=model_path)
 
-    # Run inference
-    with torch.no_grad():
-       # Run the forward pass
-        overlap = 0.5  # Standard overlap for sliding window
+        # Set model to evaluation mode
+        model.eval()
+        model = model.to(device)        
 
-        # Get prediction
-        predictions = model.model.predict(
-            data=case_preprocessed,
-            mode="3D",
-            mirror=False,  # No test-time augmentation
-            overlap=overlap,
-            patch_size=patch_size,
-            sliding_window_prediction=True,
-            device=device,
-        )
+        # Run inference
+        with torch.no_grad():
+        # Run the forward pass
+            overlap = 0.5  # Standard overlap for sliding window
+
+            # Get prediction
+            predictions = model.model.predict(
+                data=case_preprocessed,
+                mode="3D",
+                mirror=False,  # No test-time augmentation
+                overlap=overlap,
+                patch_size=patch_size,
+                sliding_window_prediction=True,
+                device=device,
+            )
         
+        preds = predictions.detach().cpu().float()
+        if accum_logits is None:
+            accum_logits = preds.clone()
+        else:
+            accum_logits += preds
+        # probs = F.softmax(preds, dim=1)[:, 1]
+
+    # Mean logits
+    mean_logits = accum_logits / len(predict_config["model_list"])   # [B,C,D,H,W]
+
     # Reverse preprocessing
     transpose_forward = [0, 1, 2]
     transpose_backward = [0, 1, 2]
 
+    prob_2c_pred = torch.softmax(mean_logits, dim=1) 
     predictions_original, _ = reverse_preprocessing(
         crop_to_nonzero=crop_to_nonzero,
-        images=predictions,
+        images=prob_2c_pred,
         image_properties=case_properties,
         n_classes=num_classes,
         transpose_forward=transpose_forward,
         transpose_backward=transpose_backward,
     )
 
-    # For segmentation, apply argmax
-    # print(predictions_original.shape)
+    # Extract the foreground channel in original space
+    # prob_orig = predictions_original[0, 1]  # [D,H,W] numpy
     segmentation_mask = np.argmax(predictions_original[0], axis=0)
     segmentation_mask = (segmentation_mask > 0).astype(np.uint8)
-    # print(segmentation_mask.shape)
-    # print("Unique values in segmentation:", np.unique(segmentation_mask))
+
+    # prob_mean_orig = predictions_original[0, 1].astype(np.float32)
+    # Threshold to get binary mask (could tune; 0.5 is a good default)
+    # segmentation_mask = (prob_mean_orig >= 0.5).astype(np.uint8)
+
+    # Optional: simple post-proc to fight speckles and holes    
+    lbl, n = ndi.label(segmentation_mask)
+    min_cc = predict_config.get("min_cc_size", 10)  # tune on val
+    for i in range(1, n+1):
+        if (lbl == i).sum() < min_cc:
+            segmentation_mask[lbl == i] = 0
+    # small hole fill
+    # segmentation_mask = ndi.binary_fill_holes(segmentation_mask).astype(np.uint8)
+
+    # # For segmentation, apply argmax        
+    # segmentation_mask = np.argmax(predictions_original[0], axis=0)
+    # segmentation_mask = (segmentation_mask > 0).astype(np.uint8)
 
     return segmentation_mask, reference_img
 

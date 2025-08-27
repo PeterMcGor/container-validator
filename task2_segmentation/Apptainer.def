@@ -20,7 +20,10 @@ From: python:3.11-slim
     ./requirements.txt /app/requirements.txt
 
     # Copy model
-    /media/jaume/DATA/Data/fomo25_models/Task002_FOMO2 /app/models/
+    # /media/jaume/DATA/Data/fomo25_models/Task002_FOMO2 /app/models/
+    
+    # Copy ensemble of models
+    /media/jaume/T7/FOMO-MRI/model_test_jaume_6/Task002_FOMO2 /app/models/
 
 %post
     # Create necessary directories

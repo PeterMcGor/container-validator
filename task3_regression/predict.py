@@ -24,7 +24,13 @@ predict_config = {
     # Import values from task_configs
     **task3_config,
     # Add inference-specific configs
-    "model_path": "/app/models/Task003_FOMO3/mmunetvae/version_0/checkpoints/best_model.ckpt",
+    # "model_path": "/app/models/Task003_FOMO3/mmunetvae/version_0/checkpoints/best_model.ckpt",
+    "model_list": ["/app/models/Task003_FOMO3/mmunetvae/split_0/version_0/checkpoints/best_model.ckpt",
+                   "/app/models/Task003_FOMO3/mmunetvae/split_1/version_0/checkpoints/best_model.ckpt",
+                   "/app/models/Task003_FOMO3/mmunetvae/split_2/version_0/checkpoints/best_model.ckpt",
+                   "/app/models/Task003_FOMO3/mmunetvae/split_3/version_0/checkpoints/best_model.ckpt",
+                   "/app/models/Task003_FOMO3/mmunetvae/split_4/version_0/checkpoints/best_model.ckpt",
+                   ],
     "patch_size": (64, 64, 64),
 }
 
@@ -92,7 +98,7 @@ def predict_age(args):
     num_classes = predict_config["num_classes"]
     keep_aspect_ratio = predict_config.get("keep_aspect_ratio", True)
     patch_size = predict_config["patch_size"]
-    model_path = predict_config["model_path"]
+    # model_path = predict_config["model_path"]
 
     # Define preprocessing parameters
     normalization_scheme = [norm_op] * len(modality_paths)
@@ -115,35 +121,40 @@ def predict_age(args):
     )
 
     # Load the model checkpoint directly with Lightning
-    model = SupervisedRegModel.load_from_checkpoint(checkpoint_path=model_path)    
-
-    # Set model to evaluation mode
-    model.eval()
-
-    # Get device
+    pred_ages = []           # Age predicted per model
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = model.to(device)
     case_preprocessed = case_preprocessed.to(device)
+    for model_path in predict_config["model_list"]:
+        model = SupervisedRegModel.load_from_checkpoint(checkpoint_path=model_path)    
 
-    # Run inference
-    with torch.no_grad():
-       # Run the forward pass
-        overlap = 0.5  # Standard overlap for sliding window
+        # Set model to evaluation mode
+        model.eval()
+        model = model.to(device)        
 
-        # Get prediction
-        predictions = model.model.predict(
-            data=case_preprocessed,
-            mode="3D",
-            mirror=False,  # No test-time augmentation
-            overlap=overlap,
-            patch_size=patch_size,
-            sliding_window_prediction=True,
-            device=device,
-        )
-            
-    # For regression, just take the raw prediction
-    predicted_age = predictions[0, 0]
-    print(predictions)
+        # Run inference
+        with torch.no_grad():
+        # Run the forward pass
+            overlap = 0.5  # Standard overlap for sliding window
+
+            # Get prediction
+            predictions = model.model.predict(
+                data=case_preprocessed,
+                mode="3D",
+                mirror=False,  # No test-time augmentation
+                overlap=overlap,
+                patch_size=patch_size,
+                sliding_window_prediction=True,
+                device=device,
+            )
+                
+        # For regression, just take the raw prediction
+        pred_age_model = predictions[0, 0]
+        pred_ages.append(pred_age_model)
+
+    # Take mean age?
+    print(pred_ages)
+    ages_tensor  = torch.tensor(pred_ages)
+    predicted_age = float(ages_tensor.median().item())
 
     return predicted_age
 

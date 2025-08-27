@@ -20,7 +20,13 @@ predict_config = {
     # Import values from task_configs
     **task1_config,
     # Add inference-specific configs
-    "model_path": "/app/models/Task001_FOMO1/mmunetvae/version_0/checkpoints/best_model.ckpt",
+    # "model_path": "/app/models/Task001_FOMO1/mmunetvae/version_0/checkpoints/best_model.ckpt",
+    "model_list": ["/app/models/Task001_FOMO1/mmunetvae/split_0/version_0/checkpoints/best_model.ckpt",
+                   "/app/models/Task001_FOMO1/mmunetvae/split_1/version_0/checkpoints/best_model.ckpt",
+                   "/app/models/Task001_FOMO1/mmunetvae/split_2/version_0/checkpoints/best_model.ckpt",
+                   "/app/models/Task001_FOMO1/mmunetvae/split_3/version_0/checkpoints/best_model.ckpt",
+                   "/app/models/Task001_FOMO1/mmunetvae/split_4/version_0/checkpoints/best_model.ckpt",
+                   ],
     "patch_size": (64, 64, 64),
 }
 
@@ -107,7 +113,7 @@ def predict(args):
     num_classes = predict_config["num_classes"]
     keep_aspect_ratio = predict_config.get("keep_aspect_ratio", True)
     patch_size = predict_config["patch_size"]
-    model_path = predict_config["model_path"]
+    # model_path = predict_config["model_path"]
 
     # Define preprocessing parameters
     normalization_scheme = [norm_op] * len(modality_paths)
@@ -130,52 +136,51 @@ def predict(args):
     )
 
     # Load the model checkpoint directly with Lightning
-    model = SupervisedClsModel.load_from_checkpoint(checkpoint_path=model_path)    
-
-    # Set model to evaluation mode
-    model.eval()
-
-    # Get device
+    probs = []           # per-model positive-class probabilities
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = model.to(device)
     case_preprocessed = case_preprocessed.to(device)
+    for model_path in predict_config["model_list"]:
+        model = SupervisedClsModel.load_from_checkpoint(checkpoint_path=model_path)    
 
-    # Run inference
-    with torch.no_grad():
-       # Run the forward pass
-        overlap = 0.5  # Standard overlap for sliding window
+        # Set model to evaluation mode
+        model.eval()        
+        model = model.to(device)        
 
-        # Get prediction
-        predictions = model.model.predict(
-            data=case_preprocessed,
-            mode="3D",
-            mirror=False,  # No test-time augmentation
-            overlap=overlap,
-            patch_size=patch_size,
-            sliding_window_prediction=True,
-            device=device,
-        )
-        
-    # For classification, apply softmax and take argmax        
-    pred_probs = F.softmax(predictions, dim=1)
-    pred_label = pred_probs.argmax().item()
+        # Run inference
+        with torch.no_grad():
+        # Run the forward pass
+            overlap = 0.5  # Standard overlap for sliding window
 
-    # Probability of positive class (infarct presence)
-    # print(predictions)
-    # print(predictions.shape)
-    # print(pred_probs)
-    # print(pred_probs.shape)
-    probability = pred_probs[0][1].item()  # Assuming class 1 is positive
+            # Get prediction
+            predictions = model.model.predict(
+                data=case_preprocessed,
+                mode="3D",
+                mirror=False,  # No test-time augmentation
+                overlap=overlap,
+                patch_size=patch_size,
+                sliding_window_prediction=True,
+                device=device,
+            )
+            
+        # For classification, apply softmax and take argmax
+        # pred_probs = F.softmax(predictions, dim=1)
+        # pred_label = pred_probs.argmax().item()
 
-    # predictions_softmax = torch.nn.functional.softmax(
-    #     torch.from_numpy(predictions_original), dim=1
-    # )
-    # prediction_final = torch.argmax(predictions_softmax, dim=1)[0].numpy()    
+        # Probability of positive class (infarct presence)
+        # print(predictions)
+        # print(predictions.shape)
+        # print(pred_probs)
+        # print(pred_probs.shape)
+        probability = predictions[0][1].item()  # Assuming class 1 is positive
 
-    # Save the prediction
-    # save_prediction(prediction_final, images[0], output_path)
+        probs.append(probability)
 
-    return probability
+    probs_tensor  = torch.tensor(probs)
+    print(probs_tensor)
+    p_mean = float(probs_tensor.mean().item())
+
+    return p_mean
+
 
 def main():
     """Main execution function."""

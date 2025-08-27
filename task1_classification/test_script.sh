@@ -35,6 +35,7 @@ for subject_id in "${subjects[@]}"; do
     mkdir -p "${output_path}"
 
     echo "Running prediction for ${subject_id}..."
+    start_time=$(date +%s)
 
     apptainer run \
         --bind "${input_data}:/input:ro" \
@@ -47,6 +48,9 @@ for subject_id in "${subjects[@]}"; do
         --t2s /input/t2s.nii.gz \
         --output /output/${subject_id}.txt
 
-    echo "Finished ${subject_id}"
+    end_time=$(date +%s)
+    elapsed=$((end_time - start_time))
+
+    echo "Finished ${subject_id} in ${elapsed} seconds"
     echo
 done
