@@ -1,0 +1,63 @@
+Bootstrap: localimage
+From: /media/jaume/DATA/Data/SingularityImagesFOMO_DINO/dino3d_base.sif
+
+%labels
+    Author FOMO25 Challenge - Classification Task
+    Version v1.0.0
+    Description FOMO25 Infarct Classification Apptainer Image
+
+%environment
+    export PYTHONUNBUFFERED=1
+    export LC_ALL=C.UTF-8
+
+%files
+    # Copy your files (model, predict.py, requirements.txt, ...) to the container
+    /media/jaume/DATA/Data/fomo25/fomo_apptainer_key /root/.ssh/id_ed25519
+    ./predict.py /app/predict.py
+    ./requirements.txt /app/requirements.txt
+
+    # Copy model [1]
+    # /media/jaume/DATA/Data/fomo25_models/Task001_FOMO1 /app/models/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task1/4channels/fold_0_sw_tf /app/models/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task1/4channels/fold_1_sw_tf /app/models/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task1/4channels/fold_2_sw_tf /app/models/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task1/4channels/fold_3_sw_tf /app/models/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task1/4channels/fold_4_sw_tf /app/models/
+
+    # Copy ensemble of models
+    # /media/jaume/T7/FOMO-MRI/model_test_jaume_6/Task001_FOMO1 /app/models/
+
+%post
+    # Make it executable
+    chmod +x /app/predict.py
+    # install only lightweight or updated deps
+    # /opt/conda/envs/dino3d/bin/pip install -r /app/requirements.txt
+
+%environment
+    export PYTHONUNBUFFERED=1
+    export LC_ALL=C.UTF-8
+    export PATH="/opt/conda/envs/dino3d/bin:$PATH"
+
+%runscript
+    # Execute the prediction script with all arguments
+    exec python /app/predict.py "$@"
+
+%help
+    This container runs the FOMO25 infarct classification task.
+
+    Build this container with:
+        
+        `apptainer build --fakeroot /path/to/save/classification.sif /path/to/Apptainer.def`
+
+    
+    Usage:
+        
+        `apptainer run --bind /path/to/input:/input:ro \
+            --bind /path/to/output:/output \
+            --nv \
+            classification.sif \
+            --flair /input/flair.nii.gz \
+            --adc /input/adc.nii.gz \
+            --dwi_b1000 /input/dwi.nii.gz \
+            --t2s /input/t2s.nii.gz \
+            --output /output/sub_id.txt`

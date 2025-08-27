@@ -16,16 +16,7 @@ From: python:3.11-slim
 %files
     # Copy your files (model, predict.py, requirements.txt, ...) to the container
     /media/jaume/DATA/Data/fomo25/fomo_apptainer_key /root/.ssh/id_ed25519
-    ./predict.py /app/predict.py
     ./requirements.txt /app/requirements.txt
-
-    # Copy model [1]
-    # /media/jaume/DATA/Data/fomo25_models/Task001_FOMO1 /app/models/
-    /media/jaume/T7/finetuning_exps/mimic_preprocess/task1/4channels/fold_0_sw_tf /app/models/
-    /media/jaume/T7/finetuning_exps/mimic_preprocess/task1/4channels/fold_1_sw_tf /app/models/
-    /media/jaume/T7/finetuning_exps/mimic_preprocess/task1/4channels/fold_2_sw_tf /app/models/
-    /media/jaume/T7/finetuning_exps/mimic_preprocess/task1/4channels/fold_3_sw_tf /app/models/
-    /media/jaume/T7/finetuning_exps/mimic_preprocess/task1/4channels/fold_4_sw_tf /app/models/
 
 %post
     # Create necessary directories
@@ -82,15 +73,6 @@ From: python:3.11-slim
     ln -sf /opt/conda/envs/dino3d/bin/python /usr/local/bin/python
     ln -sf /opt/conda/envs/dino3d/bin/pip /usr/local/bin/pip
 
-    # Clean cache
-    /opt/conda/bin/conda clean -afy
-    rm -rf /root/.cache/pip
-    rm -rf /var/cache/apt/*
-    rm -rf /app/3D-DINO/.git
-
-    # Make it executable
-    chmod +x /app/predict.py
-    
 %environment
     export PYTHONUNBUFFERED=1
     export LC_ALL=C.UTF-8
@@ -98,25 +80,4 @@ From: python:3.11-slim
     export PYTHONPATH="/app/3D-DINO:$PYTHONPATH"
 
 %runscript
-    # Execute the prediction script with all arguments
-    exec python /app/predict.py "$@"
-
-%help
-    This container runs the FOMO25 infarct classification task.
-
-    Build this container with:
-        
-        `apptainer build --fakeroot /path/to/save/classification.sif /path/to/Apptainer.def`
-
-    
-    Usage:
-        
-        `apptainer run --bind /path/to/input:/input:ro \
-            --bind /path/to/output:/output \
-            --nv \
-            classification.sif \
-            --flair /input/flair.nii.gz \
-            --adc /input/adc.nii.gz \
-            --dwi_b1000 /input/dwi.nii.gz \
-            --t2s /input/t2s.nii.gz \
-            --output /output/sub_id.txt`
+    echo "Base image only — extend with app layer."

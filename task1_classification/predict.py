@@ -1,205 +1,285 @@
 #!/usr/bin/env python3
 import argparse
 from pathlib import Path
-import numpy as np
 import torch
 import torch.nn.functional as F
+import os
+import json
+import yaml
+from functools import partial
 
-from fomo25.src.inference.predict import load_modalities
-from fomo25.src.data.task_configs import task1_config
-from fomo25.src.models.supervised_cls import SupervisedClsModel
-
-from yucca.functional.preprocessing import (
-    preprocess_case_for_inference,
-    reverse_preprocessing,
+from monai.transforms import (
+    Compose, LoadImaged, ConcatItemsd, DeleteItemsd, EnsureTyped,
+    Orientationd, Spacingd, ScaleIntensityRangePercentilesd, SpatialPadd
 )
+
+from dinov2.eval.linear3d_class import (
+    LinearRegressor, LinearPostprocessor, create_linear_input
+)
+from dinov2.eval.utils import ViTAdapterFeatureWrapper, predict_reduce_tokens
+from dinov2.eval.setup import setup_and_build_model_3d
 
 
 # Task-specific hardcoded configuration
 predict_config = {
-    # Import values from task_configs
-    **task1_config,
-    # Add inference-specific configs
-    "model_path": "/app/models/Task001_FOMO1/mmunetvae/version_0/checkpoints/best_model.ckpt",
-    "patch_size": (64, 64, 64),
+    # "model_path": "/app/models/Task001_FOMO1/mmunetvae/version_0/checkpoints/best_model.ckpt",
+                #        "/app/models/Task001_FOMO1/mmunetvae/split_1/version_0/checkpoints/best_model.ckpt",
+                #    "/app/models/Task001_FOMO1/mmunetvae/split_2/version_0/checkpoints/best_model.ckpt",
+                #    "/app/models/Task001_FOMO1/mmunetvae/split_3/version_0/checkpoints/best_model.ckpt",
+                #    "/app/models/Task001_FOMO1/mmunetvae/split_4/version_0/checkpoints/best_model.ckpt",
+    "model_list": ["/app/models/fold_0_sw_tf/best_val.pth",
+                   "/app/models/fold_1_sw_tf/best_val.pth",
+                   "/app/models/fold_2_sw_tf/best_val.pth",
+                   "/app/models/fold_3_sw_tf/best_val.pth",
+                   "/app/models/fold_4_sw_tf/best_val.pth",
+                   ],
 }
 
 
 def parse_args():
-    """Parse command line arguments."""
-    parser = argparse.ArgumentParser(description="FOMO25 Task 1 - Infarct Classification")
-    
-    # Input paths for each modality
-    parser.add_argument("--flair", type=str, help="Path to T2 FLAIR image")
-    parser.add_argument("--adc", type=str, help="Path to ADC image")
-    parser.add_argument("--dwi_b1000", type=str, help="Path to DWI b1000 image")
-    parser.add_argument("--t2s", type=str, help="Path to T2* image (optional)")
-    parser.add_argument("--swi", type=str, help="Path to SWI image (optional)")
-    
-    # Output path for predictions
-    parser.add_argument("--output", type=str, required=True, help="Path to save output .txt file")
-    
+    parser = argparse.ArgumentParser(description="3DINO Inference for FOMO25")
+    parser.add_argument("--dwi_b1000", type=str, required=True)
+    parser.add_argument("--flair", type=str, required=True)
+    parser.add_argument("--adc", type=str, required=True)
+    parser.add_argument("--t2s", type=str, default=None)
+    parser.add_argument("--swi", type=str, default=None)
+    parser.add_argument("--output", type=str, required=True)
+
+    # DINO stuff
+    parser.add_argument('--config_file', type=str, default='/app/dinov2/configs/train/vit3d_highres.yaml', help='Path to config file used during training')    
+    parser.add_argument('--arch', type=str, default='vit_large', help='Model architecture (default from your training)')
+    parser.add_argument('--patch_size', type=int, default=16, help='Patch size (default from your training)')
+    parser.add_argument('--image_size', type=int, default=112, help='Image size used during training (matches global_crops_size)')
+    parser.add_argument('--seed', type=int, default=0)
+    parser.add_argument('--output_dir', type=str, default="/output/tmp")
+    parser.add_argument('--cache_dir', type=str, default="/output/cache")
+
     return parser.parse_args()
 
-def predict(args):
-    """
-    Predict infarct probability based on the provided modalities.
+
+def prepare_input_images(args):
+    if args.swi:
+        print("Using SWI as third channel")
+        data_dict = {"image1": args.dwi_b1000, "image2": args.flair, "image3": args.adc, "image4": args.swi}
+    elif args.t2s:
+        print("Using T2* as third channel")
+        data_dict = {"image1": args.dwi_b1000, "image2": args.flair, "image3": args.adc, "image4": args.t2s}
     
-    Returns:
-        float: Probability of positive class (infarct presence) between 0 and 1
-    """
     
-    #########################################################################
-    # PLACEHOLDER: ADD YOUR INFERENCE CODE HERE
-    #########################################################################
-    # 
-    # Available image paths:
-    #   - args.flair: T2 FLAIR image path
-    #   - args.adc: ADC image path  
-    #   - args.dwi_b1000: DWI b1000 image path
-    #   - args.t2s: T2* image path (may be None)
-    #   - args.swi: SWI image path (may be None)
-    #
-    # Example steps you might implement:
-    #   1. Load the images you need (not all 4 are required)
-    #   2. Preprocess the images (normalize, resample, etc.)
-    #   3. Load your trained model
-    #   4. Run inference
-    #   5. Return probability of positive class
-    #
-    # Example (replace with your actual code):
-    #   model = load_your_model()
-    #   images = load_and_preprocess_images(args)
-    #   probability = model.predict(images)
-    #
-    #########################################################################
+    keys = list(data_dict.keys())
+    transforms = Compose([
+        LoadImaged(keys=keys, ensure_channel_first=True),
+        ConcatItemsd(keys=keys, name="image", dim=0),
+        DeleteItemsd(keys=keys),
+        EnsureTyped(keys=["image"]),
+        Orientationd(keys=["image"], axcodes="RAS"),
+        Spacingd(
+            keys=["image"],
+            pixdim=(1.0,) * 3,
+            mode="bilinear"
+        ),
+        ScaleIntensityRangePercentilesd(
+            keys=["image"], lower=0.05, upper=99.95,
+            b_min=-1.0, b_max=1.0, clip=True, channel_wise=True
+        ),
+        SpatialPadd(keys=["image"], spatial_size=(args.image_size,) * 3, value=-1.0),
+    ])
+
+    processed = transforms(data_dict)
+    tensor = processed["image"].unsqueeze(0)  # [1, C, H, W, D]
+    print(f"Input tensor shape: {tensor.shape}")
+    return tensor, tensor.shape[1]
+
+
+
+def load_config(config_path):
+    """Load YAML configuration file and merge with defaults"""
     
-    # Dummy probability - REPLACE THIS WITH YOUR ACTUAL PREDICTION
-    # probability = 0.75  # Example probability, should be between 0 and 1
+    # Default configuration (from your default config)
+    default_config = {
+        'student': {
+            'arch': 'vit_large_3d',
+            'patch_size': 16,
+            'drop_path_rate': 0.3,
+            'layerscale': 1.0e-05,
+            'drop_path_uniform': True,
+            'pretrained_weights': '',
+            'full_pretrained_weights': '',
+            'ffn_layer': 'mlp',
+            'block_chunks': 4,
+            'qkv_bias': True,
+            'proj_bias': True,
+            'ffn_bias': True
+        },
+        'crops': {
+            'global_crops_size': 96,
+            'local_crops_size': 48
+        },
+        'train': {
+            'batch_size_per_gpu': 128,
+            'data_min_axis_size': 24,
+            'OFFICIAL_EPOCH_LENGTH': 25
+        },
+        'optim': {
+            'base_lr': 0.002
+        },
+        'evaluation': {
+            'eval_period_iterations': 12500
+        }
+    }
     
-    # NOTE: Remember the order [ preprocess task 1 ]
-    # if "dwi" in file:
-    #     modality_index = 0  # DWI
-    # elif "flair" in file:
-    #     modality_index = 1  # T2FLAIR
-    # elif "adc" in file:
-    #     modality_index = 2  # ADC
-    # elif "swi" in file or "t2s" in file:
-    #     modality_index = 3  # SWI_OR_T2STAR
-    # else:
-    #     continue
-
-    # Map arguments to modality paths in expected order from task 
-    if args.swi is not None:
-        modality_paths = [args.dwi_b1000, args.flair, args.adc, args.swi]
-    elif args.t2s is not None:
-        modality_paths = [args.dwi_b1000, args.flair, args.adc, args.t2s]
-    else:
-        raise ValueError("At least one of SWI or T2* must be provided")
-
-    # Load input images
-    images = load_modalities(modality_paths)
-
-    # Extract configuration parameters
-    task_type = predict_config["task_type"]
-    crop_to_nonzero = predict_config["crop_to_nonzero"]
-    norm_op = predict_config["norm_op"]
-    num_classes = predict_config["num_classes"]
-    keep_aspect_ratio = predict_config.get("keep_aspect_ratio", True)
-    patch_size = predict_config["patch_size"]
-    model_path = predict_config["model_path"]
-
-    # Define preprocessing parameters
-    normalization_scheme = [norm_op] * len(modality_paths)
-    target_spacing = [1.0, 1.0, 1.0]  # Isotropic 1mm spacing
-    target_orientation = "RAS"
-
-    # Apply preprocessing
-    case_preprocessed, case_properties = preprocess_case_for_inference(
-        crop_to_nonzero=crop_to_nonzero,
-        images=images,
-        intensities=None,  # Use default intensity normalization
-        normalization_scheme=normalization_scheme,
-        patch_size=patch_size,
-        target_size=None,  # We use target_spacing instead
-        target_spacing=target_spacing,
-        target_orientation=target_orientation,
-        allow_missing_modalities=False,
-        keep_aspect_ratio=keep_aspect_ratio,
-        transpose_forward=[0, 1, 2],  # Standard transpose order
-    )
-
-    # Load the model checkpoint directly with Lightning
-    model = SupervisedClsModel.load_from_checkpoint(checkpoint_path=model_path)    
-
-    # Set model to evaluation mode
-    model.eval()
-
-    # Get device
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = model.to(device)
-    case_preprocessed = case_preprocessed.to(device)
-
-    # Run inference
-    with torch.no_grad():
-       # Run the forward pass
-        overlap = 0.5  # Standard overlap for sliding window
-
-        # Get prediction
-        predictions = model.model.predict(
-            data=case_preprocessed,
-            mode="3D",
-            mirror=False,  # No test-time augmentation
-            overlap=overlap,
-            patch_size=patch_size,
-            sliding_window_prediction=True,
-            device=device,
-        )
+    # Load and merge highres config if it exists
+    if os.path.exists(config_path):
+        with open(config_path, 'r') as f:
+            highres_config = yaml.safe_load(f)
         
-    # For classification, apply softmax and take argmax        
-    pred_probs = F.softmax(predictions, dim=1)
-    pred_label = pred_probs.argmax().item()
+        # Merge configurations (highres overrides default)
+        def merge_configs(default, override):
+            result = default.copy()
+            for key, value in override.items():
+                if key in result and isinstance(result[key], dict) and isinstance(value, dict):
+                    result[key] = merge_configs(result[key], value)
+                else:
+                    result[key] = value
+            return result
+        
+        config = merge_configs(default_config, highres_config)
+        print(f"Loaded config from: {config_path}")
+    else:
+        config = default_config
+        print(f"Warning: Config file {config_path} not found. Using defaults.")
+    
+    return config
 
-    # Probability of positive class (infarct presence)
-    # print(predictions)
-    # print(predictions.shape)
-    # print(pred_probs)
-    # print(pred_probs.shape)
-    probability = pred_probs[0][1].item()  # Assuming class 1 is positive
 
-    # predictions_softmax = torch.nn.functional.softmax(
-    #     torch.from_numpy(predictions_original), dim=1
-    # )
-    # prediction_final = torch.argmax(predictions_softmax, dim=1)[0].numpy()    
 
-    # Save the prediction
-    # save_prediction(prediction_final, images[0], output_path)
+def build_model_and_feature_extractor(args, input_channels):
+    model, autocast_dtype = setup_and_build_model_3d(args)
+    autocast_ctx = partial(torch.cuda.amp.autocast, enabled=True, dtype=autocast_dtype)
 
-    return probability
+    feature_model = ViTAdapterFeatureWrapper(
+        vit_model=model,
+        input_channels=input_channels,
+        n_last_blocks=4,
+        autocast_ctx=autocast_ctx
+    ).eval().cuda()
+
+    return feature_model, autocast_ctx
+
+
+def build_regressor_from_ckpt(ckpt_path, feature_model, input_channels):
+    ckpt = torch.load(ckpt_path, map_location="cuda")
+
+    best_name = ckpt.get("iteration_metadata", {}).get("best_classifier_name")
+        
+    # Fallback: Read from JSON file
+    if not best_name:
+        out_path = "/".join(ckpt_path.split('/')[:-1])
+        try:
+            metrics_path = os.path.join(out_path, "results_eval_regression.json")
+            with open(metrics_path, "r") as f:
+                lines = f.readlines()
+                for line in reversed(lines):
+                    if line.strip().startswith("{\"best_classifier\""):
+                        best_name = json.loads(line)["best_classifier"]["name"]
+                        break
+        except Exception as e:
+            raise RuntimeError(f"Failed to retrieve best regressor from JSON: {e}")
+
+    assert best_name, "Best regressor name not found in checkpoint or metrics file."
+    print(f"Using best regressor: {best_name}")
+
+    n_blocks = 1 if "1_blocks" in best_name else 4
+    avgpool = "avgpool_True" in best_name
+
+    # Dummy tensor to compute out_dim
+    dummy_tensor = torch.randn(1, input_channels, 112, 112, 112).cuda()
+    with torch.no_grad():
+        dummy_output = feature_model(dummy_tensor)
+        out_dim = create_linear_input(dummy_output, use_n_blocks=n_blocks, use_avgpool=avgpool).shape[1]
+
+    # Create regressor
+    regressor = LinearRegressor(out_dim, n_blocks, avgpool, num_outputs=2).cuda()
+    regressor.load_state_dict({
+        k.replace(f"linear_regressors.regressors_dict.{best_name}.", ""): v
+        for k, v in ckpt["model"].items()
+        if k.startswith(f"linear_regressors.regressors_dict.{best_name}.")
+    })
+
+    # Load feature extractor weights
+    feature_model.load_state_dict({
+        k.replace("feature_model.", ""): v
+        for k, v in ckpt["model"].items()
+        if k.startswith("feature_model.")
+    })
+
+    return regressor, best_name
+
+
+def predict(args):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
+    # Load configuration and update args with config values if needed
+    print("Loading configuration...")
+    print(args)
+    args.opts = []  # Empty list for additional config options
+    args.pretrained_weights = ""
+    config = load_config(args.config_file)
+    
+    # Update image size from config if not explicitly set
+    if args.image_size == 112:  # default value
+        config_image_size = config.get('crops', {}).get('global_crops_size', 112)
+        if config_image_size != 112:
+            args.image_size = config_image_size
+            print(f"Updated image size from config: {args.image_size}")
+    
+    print(f"Using image size: {args.image_size}")
+    print(f"Using config file: {args.config_file}")
+
+    # Load images and pre-process them
+    input_tensor, input_channels = prepare_input_images(args)
+    input_tensor = input_tensor.to(device)
+    
+    # Load the feature model
+    feature_model, autocast_ctx = build_model_and_feature_extractor(args, input_channels)
+
+    probs = []
+    for ckpt_path in predict_config["model_list"]:
+        print(f"[INFO] Loading checkpoint: {ckpt_path}")
+        regressor, best_name = build_regressor_from_ckpt(ckpt_path, feature_model, input_channels)
+
+        with torch.no_grad(): # autocast_ctx():
+            output_tokens = predict_reduce_tokens(
+                backbone=feature_model,
+                heads={best_name: regressor},
+                x=input_tensor.float(),
+                roi=(args.image_size,) * 3,
+                overlap=0.5,
+                sw_bs=1,
+                reduce="max",
+                create_linear_input_fn=create_linear_input
+            )
+
+        logits = output_tokens[best_name]  # [1, num_classes]
+        prob = F.softmax(logits, dim=-1)[0][1].item()
+        print(f"    ↳ Predicted probability: {prob:.3f}")
+        probs.append(prob)
+
+    p_mean = float(torch.tensor(probs).mean().item())
+    print(f"[✓] Final ensembled infarct probability: {p_mean:.3f}")
+
+    return p_mean
+
 
 def main():
-    """Main execution function."""
     args = parse_args()
-    
-    # Create output directory if it doesn't exist
     Path(args.output).parent.mkdir(parents=True, exist_ok=True)
-    
-    # Get prediction probability
-    probability = predict(args)
-    
-    # Save probability in a text file called <subject_id>.txt
-    subject_id = Path(args.output).stem  # Extract subject ID from output path
-    output_file = Path(args.output).parent / f"{subject_id}.txt"
-    with open(output_file, 'w') as f:
-        f.write(f"{probability:.3f}")
 
-    # # And the prediction label
-    # if probability >= 0.5:
-    #     prediction_label = "infarct"
-    # else:
-    #     prediction_label = "no_infarct"
-    
-    return 0
+    prob = predict(args)
+
+    with open(args.output, "w") as f:
+        f.write(f"{prob:.3f}")
+
 
 if __name__ == "__main__":
-    exit(main())
+    main()

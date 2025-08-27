@@ -1,16 +1,19 @@
 #!/bin/bash
 
-img_path="/media/jaume/DATA/Data/SingularityImagesFOMO/classification.sif"
+img_path="/media/jaume/DATA/Data/SingularityImagesFOMO_DINO/classification.sif"
 
 subject_id="sub_4"
-input_data="/home/jaume/Desktop/Code/container-validator/fake_data/fomo25/fomo-task1-val/preprocessed/sub_4/ses_1"
-output_path="/media/jaume/DATA/Data/fomo25/fomo-task1-val/predictions"
+input_data="/home/jaume/Desktop/Code/container-validator_dino/fake_data/fomo25/fomo-task1-val/preprocessed/sub_4/ses_1"
+output_path="/media/jaume/DATA/Data/fomo25/fomo-task1-val/predictions_dino"
 mkdir -p ${output_path}
 
-predict_script="/home/jaume/Desktop/Code/container-validator/task1_classification/predict.py"
+predict_script="/home/jaume/Desktop/Code/container-validator_dino/task1_classification/predict.py"
+echo "Running prediction for ${subject_id}..."
+start_time=$(date +%s)
 
-# --bind ${predict_script}:/app/predict.py \
-apptainer run --bind ${input_data}:/input:ro \
+apptainer run \
+    --bind ${predict_script}:/app/predict.py \
+    --bind ${input_data}:/input:ro \
     --bind ${output_path}:/output \
     --nv \
     ${img_path} \
@@ -20,33 +23,40 @@ apptainer run --bind ${input_data}:/input:ro \
     --t2s /input/t2s.nii.gz \
     --output /output/${subject_id}.txt
 
+end_time=$(date +%s)
+elapsed=$((end_time - start_time))
 
-# ===== Loop =====
-mg_path="/media/jaume/DATA/Data/SingularityImagesFOMO/classification.sif"
-input_root="/home/jaume/Desktop/Code/container-validator/fake_data/fomo25/fomo-task1-val/preprocessed"
-output_root="/media/jaume/DATA/Data/fomo25/fomo-task1-val/predictions"
+echo "Finished ${subject_id} in ${elapsed} seconds"
 
-# Subject IDs to process
-subjects=("sub_4" "sub_14" "sub_15")
+# # ===== Loop =====
+# input_root="/home/jaume/Desktop/Code/container-validator_dino/fake_data/fomo25/fomo-task1-val/preprocessed"
+# output_root="/media/jaume/DATA/Data/fomo25/fomo-task1-val/predictions_dino"
 
-for subject_id in "${subjects[@]}"; do
-    input_data="${input_root}/${subject_id}/ses_1"
-    output_path="${output_root}"
-    mkdir -p "${output_path}"
+# # Subject IDs to process
+# subjects=("sub_4" "sub_14" "sub_15")
 
-    echo "Running prediction for ${subject_id}..."
+# for subject_id in "${subjects[@]}"; do
+#     input_data="${input_root}/${subject_id}/ses_1"
+#     output_path="${output_root}"
+#     mkdir -p "${output_path}"
 
-    apptainer run \
-        --bind "${input_data}:/input:ro" \
-        --bind "${output_path}:/output" \
-        --nv \
-        "${img_path}" \
-        --flair /input/flair.nii.gz \
-        --adc /input/adc.nii.gz \
-        --dwi_b1000 /input/dwi_b1000.nii.gz \
-        --t2s /input/t2s.nii.gz \
-        --output /output/${subject_id}.txt
+#     echo "Running prediction for ${subject_id}..."
+#     start_time=$(date +%s)
 
-    echo "Finished ${subject_id}"
-    echo
-done
+#     apptainer run \
+#         --bind "${input_data}:/input:ro" \
+#         --bind "${output_path}:/output" \
+#         --nv \
+#         "${img_path}" \
+#         --flair /input/flair.nii.gz \
+#         --adc /input/adc.nii.gz \
+#         --dwi_b1000 /input/dwi_b1000.nii.gz \
+#         --t2s /input/t2s.nii.gz \
+#         --output /output/${subject_id}.txt
+
+#     end_time=$(date +%s)
+#     elapsed=$((end_time - start_time))
+
+#     echo "Finished ${subject_id} in ${elapsed} seconds"
+#     echo
+# done

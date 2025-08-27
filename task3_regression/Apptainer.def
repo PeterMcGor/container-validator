@@ -5,9 +5,9 @@ Bootstrap: docker
 From: python:3.11-slim
 
 %labels
-    Author FOMO25 Challenge - Brain Age Regression Task
+    Author FOMO25 Challenge - Classification Task
     Version v1.0.0
-    Description FOMO25 Brain Age Prediction Apptainer Image
+    Description FOMO25 Infarct Classification Apptainer Image
 
 %environment
     export PYTHONUNBUFFERED=1
@@ -19,8 +19,12 @@ From: python:3.11-slim
     ./predict.py /app/predict.py
     ./requirements.txt /app/requirements.txt
 
-    # Copy model
-    /media/jaume/DATA/Data/fomo25_models/Task003_FOMO3 /app/models/
+    # Copy model [1]    
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task3/2channels/fold_0_sw_ch /app/models/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task3/2channels/fold_1_sw_ch /app/models/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task3/2channels/fold_2_sw_ch /app/models/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task3/2channels/fold_3_sw_ch /app/models/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task3/2channels/fold_4_sw_ch /app/models/
 
 %post
     # Create necessary directories
@@ -31,6 +35,7 @@ From: python:3.11-slim
         build-essential \
         git \
         openssh-client \
+        curl \
         libglib2.0-0 \
         libsm6 \
         libxext6 \
@@ -39,41 +44,78 @@ From: python:3.11-slim
         libgl1 \
         && rm -rf /var/lib/apt/lists/*
     
+    # Install Miniconda
+    curl -fsSL https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -o miniconda.sh
+    bash miniconda.sh -b -p /opt/conda
+    rm miniconda.sh
+    export PATH="/opt/conda/bin:$PATH"
+
+    # Accept conda ToS
+    /opt/conda/bin/conda config --set always_yes yes
+    /opt/conda/bin/conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
+    /opt/conda/bin/conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
+
+    # Optional: Initialize conda shell (not strictly needed in non-interactive scripts)
+    /opt/conda/bin/conda init bash
+
     # Set up SSH
     mkdir -p /root/.ssh
     chmod 600 /root/.ssh/id_ed25519
     ssh-keyscan github.com >> /root/.ssh/known_hosts
 
-    # Clone the private repo
-    git clone git@github.com:jbanusco/fomo25.git /app/fomo25
+    # Clone the repo
+    git clone git@github.com:jbanusco/3D-DINO.git /app/3D-DINO
 
-    # Install Python dependencies
-    pip install --no-cache-dir -U pip setuptools wheel
+    # Create conda env
+    /opt/conda/bin/conda create -n dino3d python=3.9 -y
 
-    # Install fomo25 as a Python package (assuming setup.py exists)
-    pip install --no-cache-dir /app/fomo25
-    pip install --no-cache-dir -r /app/requirements.txt
-    
-    # Make predict.py executable
+    # Install requirements directly into that env
+    /opt/conda/envs/dino3d/bin/pip install --no-cache-dir -U pip setuptools wheel    
+    /opt/conda/envs/dino3d/bin/pip install --no-cache-dir -r /app/requirements.txt
+    /opt/conda/envs/dino3d/bin/pip install --no-cache-dir -r /app/3D-DINO/requirements.txt
+
+    # Move dinov2 to the src level or install?
+    mv /app/3D-DINO/dinov2 /app/
+
+    # Symlink env python/pip to system paths (so `python` = conda env python)
+    ln -sf /opt/conda/envs/dino3d/bin/python /usr/local/bin/python
+    ln -sf /opt/conda/envs/dino3d/bin/pip /usr/local/bin/pip
+
+    # Clean cache
+    /opt/conda/bin/conda clean -afy
+    rm -rf /root/.cache/pip
+    rm -rf /var/cache/apt/*
+    rm -rf /app/3D-DINO/.git
+
+    # Make it executable
     chmod +x /app/predict.py
     
+%environment
+    export PYTHONUNBUFFERED=1
+    export LC_ALL=C.UTF-8
+    export PATH="/opt/conda/envs/dino3d/bin:$PATH"
+    export PYTHONPATH="/app/3D-DINO:$PYTHONPATH"
+
 %runscript
     # Execute the prediction script with all arguments
     exec python /app/predict.py "$@"
 
 %help
-    This container runs the FOMO25 brain age prediction task.
-    
+    This container runs the FOMO25 infarct classification task.
+
     Build this container with:
         
-        `apptainer build --fakeroot /path/to/save/brain_age.sif /path/to/Apptainer.def`
+        `apptainer build --fakeroot /path/to/save/classification.sif /path/to/Apptainer.def`
+
     
     Usage:
         
         `apptainer run --bind /path/to/input:/input:ro \
             --bind /path/to/output:/output \
             --nv \
-            brain_age.sif \
-            --t1 /input/t1.nii.gz \
-            --t2 /input/t2.nii.gz \
-            --output /output/age_prediction.txt`
+            classification.sif \
+            --flair /input/flair.nii.gz \
+            --adc /input/adc.nii.gz \
+            --dwi_b1000 /input/dwi.nii.gz \
+            --t2s /input/t2s.nii.gz \
+            --output /output/sub_id.txt`

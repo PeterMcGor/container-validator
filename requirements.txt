@@ -1,5 +1,5 @@
-numpy
-monai
-nibabel
-pandas
-scipy
+numpy>=1.23
+opencv-python>=4.8.1.78
+einops>=0.7
+wandb>=0.16.0
+scipy>=1.7.0

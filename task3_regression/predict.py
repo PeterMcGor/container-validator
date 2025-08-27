@@ -1,170 +1,275 @@
 #!/usr/bin/env python3
-"""
-FOMO25 Challenge - Task 3: Brain Age Prediction (Regression)
-"""
 import argparse
-import pandas as pd
 from pathlib import Path
-
 import torch
 import torch.nn.functional as F
+import os
+import json
+import yaml
+from functools import partial
 
-from fomo25.src.inference.predict import load_modalities
-from fomo25.src.data.task_configs import task3_config
-from fomo25.src.models.supervised_reg import SupervisedRegModel
-
-from yucca.functional.preprocessing import (
-    preprocess_case_for_inference,
-    reverse_preprocessing,
+from monai.transforms import (
+    Compose, LoadImaged, ConcatItemsd, DeleteItemsd, EnsureTyped,
+    Orientationd, Spacingd, ScaleIntensityRangePercentilesd, SpatialPadd
 )
+
+from dinov2.eval.linear3d_reg import (
+    LinearRegressor, LinearPostprocessor, create_linear_input
+)
+from dinov2.eval.utils import ViTAdapterFeatureWrapper, predict_reduce_tokens
+from dinov2.eval.setup import setup_and_build_model_3d
 
 
 # Task-specific hardcoded configuration
 predict_config = {
-    # Import values from task_configs
-    **task3_config,
-    # Add inference-specific configs
-    "model_path": "/app/models/Task003_FOMO3/mmunetvae/version_0/checkpoints/best_model.ckpt",
-    "patch_size": (64, 64, 64),
+    "model_list": ["/app/models/fold_0_sw_ch/best_val.pth",
+                   "/app/models/fold_1_sw_ch/best_val.pth",
+                   "/app/models/fold_2_sw_ch/best_val.pth",
+                   "/app/models/fold_3_sw_ch/best_val.pth",
+                   "/app/models/fold_4_sw_ch/best_val.pth",
+                   ],
 }
 
 
-
 def parse_args():
-    """Parse command line arguments."""
-    parser = argparse.ArgumentParser(description="FOMO25 Task 3 Brain Age Prediction")
-    
-    # Input paths for T1 and T2 modalities
-    parser.add_argument("--t1", type=str, help="Path to T1-weighted image")
-    parser.add_argument("--t2", type=str, help="Path to T2-weighted image")
-    
-    # Output path for predictions
-    parser.add_argument("--output", type=str, required=True, help="Path to save output CSV")
-    
+    parser = argparse.ArgumentParser(description="3DINO Inference for FOMO25")
+    parser.add_argument("--t1", type=str, required=True)
+    parser.add_argument("--t2", type=str, required=True)
+    parser.add_argument("--output", type=str, required=True)
+
+    # DINO stuff
+    parser.add_argument('--config_file', type=str, default='/app/dinov2/configs/train/vit3d_highres.yaml', help='Path to config file used during training')    
+    parser.add_argument('--arch', type=str, default='vit_large', help='Model architecture (default from your training)')
+    parser.add_argument('--patch_size', type=int, default=16, help='Patch size (default from your training)')
+    parser.add_argument('--image_size', type=int, default=112, help='Image size used during training (matches global_crops_size)')
+    parser.add_argument('--seed', type=int, default=0)
+    parser.add_argument('--output_dir', type=str, default="/output/tmp")
+    parser.add_argument('--cache_dir', type=str, default="/output/cache")
+
     return parser.parse_args()
 
-def predict_age(args):
-    """
-    Predict brain age based on T1 and T2 modalities.
+
+def prepare_input_images(args):            
+    data_dict = {"image1": args.t1, "image2": args.t2}
     
-    Returns:
-        float: Predicted brain age in years
-    """
     
-    #########################################################################
-    # PLACEHOLDER: ADD YOUR BRAIN AGE PREDICTION CODE HERE
-    #########################################################################
-    # 
-    # Available image paths:
-    #   - args.t1: T1-weighted image path
-    #   - args.t2: T2-weighted image path
-    #
-    # Example steps you might implement:
-    #   1. Load T1 and T2 images
-    #   2. Preprocess images (normalize, skull-strip, register, etc.)
-    #   3. Extract features or prepare input for your model
-    #   4. Load your trained regression model
-    #   5. Run inference to predict age
-    #   6. Return predicted age value
-    #
-    # Example (replace with your actual code):
-    #   model = load_your_age_prediction_model()
-    #   t1_image = load_and_preprocess_image(args.t1)
-    #   t2_image = load_and_preprocess_image(args.t2)
-    #   features = extract_features(t1_image, t2_image)
-    #   predicted_age = model.predict(features)
-    #
-    #########################################################################
+    keys = list(data_dict.keys())
+    transforms = Compose([
+        LoadImaged(keys=keys, ensure_channel_first=True),
+        ConcatItemsd(keys=keys, name="image", dim=0),
+        DeleteItemsd(keys=keys),
+        EnsureTyped(keys=["image"]),
+        Orientationd(keys=["image"], axcodes="RAS"),
+        Spacingd(
+            keys=["image"],
+            pixdim=(1.0,) * 3,
+            mode="bilinear"
+        ),
+        ScaleIntensityRangePercentilesd(
+            keys=["image"], lower=0.05, upper=99.95,
+            b_min=-1.0, b_max=1.0, clip=True, channel_wise=True
+        ),
+        SpatialPadd(keys=["image"], spatial_size=(args.image_size,) * 3, value=-1.0),
+    ])
+
+    processed = transforms(data_dict)
+    tensor = processed["image"].unsqueeze(0)  # [1, C, H, W, D]
+    print(f"Input tensor shape: {tensor.shape}")
+    return tensor, tensor.shape[1]
+
+
+
+def load_config(config_path):
+    """Load YAML configuration file and merge with defaults"""
     
-    # Dummy age prediction - REPLACE THIS WITH YOUR ACTUAL PREDICTION
-    # predicted_age = 45.0
+    # Default configuration (from your default config)
+    default_config = {
+        'student': {
+            'arch': 'vit_large_3d',
+            'patch_size': 16,
+            'drop_path_rate': 0.3,
+            'layerscale': 1.0e-05,
+            'drop_path_uniform': True,
+            'pretrained_weights': '',
+            'full_pretrained_weights': '',
+            'ffn_layer': 'mlp',
+            'block_chunks': 4,
+            'qkv_bias': True,
+            'proj_bias': True,
+            'ffn_bias': True
+        },
+        'crops': {
+            'global_crops_size': 96,
+            'local_crops_size': 48
+        },
+        'train': {
+            'batch_size_per_gpu': 128,
+            'data_min_axis_size': 24,
+            'OFFICIAL_EPOCH_LENGTH': 25
+        },
+        'optim': {
+            'base_lr': 0.002
+        },
+        'evaluation': {
+            'eval_period_iterations': 12500
+        }
+    }
     
-    # Map arguments to modality paths in expected order from task     
-    modality_paths = [args.t1, args.t2]    
+    # Load and merge highres config if it exists
+    if os.path.exists(config_path):
+        with open(config_path, 'r') as f:
+            highres_config = yaml.safe_load(f)
+        
+        # Merge configurations (highres overrides default)
+        def merge_configs(default, override):
+            result = default.copy()
+            for key, value in override.items():
+                if key in result and isinstance(result[key], dict) and isinstance(value, dict):
+                    result[key] = merge_configs(result[key], value)
+                else:
+                    result[key] = value
+            return result
+        
+        config = merge_configs(default_config, highres_config)
+        print(f"Loaded config from: {config_path}")
+    else:
+        config = default_config
+        print(f"Warning: Config file {config_path} not found. Using defaults.")
+    
+    return config
 
-    # Load input images
-    images = load_modalities(modality_paths)
 
-    # Extract configuration parameters
-    task_type = predict_config["task_type"]
-    crop_to_nonzero = predict_config["crop_to_nonzero"]
-    norm_op = predict_config["norm_op"]
-    num_classes = predict_config["num_classes"]
-    keep_aspect_ratio = predict_config.get("keep_aspect_ratio", True)
-    patch_size = predict_config["patch_size"]
-    model_path = predict_config["model_path"]
 
-    # Define preprocessing parameters
-    normalization_scheme = [norm_op] * len(modality_paths)
-    target_spacing = [1.0, 1.0, 1.0]  # Isotropic 1mm spacing
-    target_orientation = "RAS"
+def build_model_and_feature_extractor(args, input_channels):
+    model, autocast_dtype = setup_and_build_model_3d(args)
+    autocast_ctx = partial(torch.cuda.amp.autocast, enabled=True, dtype=autocast_dtype)
 
-    # Apply preprocessing
-    case_preprocessed, case_properties = preprocess_case_for_inference(
-        crop_to_nonzero=crop_to_nonzero,
-        images=images,
-        intensities=None,  # Use default intensity normalization
-        normalization_scheme=normalization_scheme,
-        patch_size=patch_size,
-        target_size=None,  # We use target_spacing instead
-        target_spacing=target_spacing,
-        target_orientation=target_orientation,
-        allow_missing_modalities=False,
-        keep_aspect_ratio=keep_aspect_ratio,
-        transpose_forward=[0, 1, 2],  # Standard transpose order
-    )
+    feature_model = ViTAdapterFeatureWrapper(
+        vit_model=model,
+        input_channels=input_channels,
+        n_last_blocks=4,
+        autocast_ctx=autocast_ctx
+    ).eval().cuda()
 
-    # Load the model checkpoint directly with Lightning
-    model = SupervisedRegModel.load_from_checkpoint(checkpoint_path=model_path)    
+    return feature_model, autocast_ctx
 
-    # Set model to evaluation mode
-    model.eval()
 
-    # Get device
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = model.to(device)
-    case_preprocessed = case_preprocessed.to(device)
+def build_regressor_from_ckpt(ckpt_path, feature_model, input_channels):
+    ckpt = torch.load(ckpt_path, map_location="cuda")
 
-    # Run inference
+    best_name = ckpt.get("iteration_metadata", {}).get("best_regressor_name")
+        
+    # Fallback: Read from JSON file
+    if not best_name:
+        out_path = "/".join(ckpt_path.split('/')[:-1])
+        try:
+            metrics_path = os.path.join(out_path, "results_eval_regression.json")
+            with open(metrics_path, "r") as f:
+                lines = f.readlines()
+                for line in reversed(lines):
+                    if line.strip().startswith("{\"best_regressor\""):
+                        best_name = json.loads(line)["best_regressor"]["name"]
+                        break
+        except Exception as e:
+            raise RuntimeError(f"Failed to retrieve best regressor from JSON: {e}")
+
+    assert best_name, "Best regressor name not found in checkpoint or metrics file."
+    print(f"Using best regressor: {best_name}")
+
+    n_blocks = 1 if "1_blocks" in best_name else 4
+    avgpool = "avgpool_True" in best_name
+
+    # Dummy tensor to compute out_dim
+    dummy_tensor = torch.randn(1, input_channels, 112, 112, 112).cuda()
     with torch.no_grad():
-       # Run the forward pass
-        overlap = 0.5  # Standard overlap for sliding window
+        dummy_output = feature_model(dummy_tensor)
+        out_dim = create_linear_input(dummy_output, use_n_blocks=n_blocks, use_avgpool=avgpool).shape[1]
 
-        # Get prediction
-        predictions = model.model.predict(
-            data=case_preprocessed,
-            mode="3D",
-            mirror=False,  # No test-time augmentation
-            overlap=overlap,
-            patch_size=patch_size,
-            sliding_window_prediction=True,
-            device=device,
-        )
-            
-    # For regression, just take the raw prediction
-    predicted_age = predictions[0, 0]
-    print(predictions)
+    # Create regressor
+    regressor = LinearRegressor(out_dim, n_blocks, avgpool, num_outputs=1).cuda()
+    regressor.load_state_dict({
+        k.replace(f"linear_regressors.regressors_dict.{best_name}.", ""): v
+        for k, v in ckpt["model"].items()
+        if k.startswith(f"linear_regressors.regressors_dict.{best_name}.")
+    })
+
+    # Load feature extractor weights
+    feature_model.load_state_dict({
+        k.replace("feature_model.", ""): v
+        for k, v in ckpt["model"].items()
+        if k.startswith("feature_model.")
+    })
+
+    return regressor, best_name
+
+
+def predict(args):
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
+    # Load configuration and update args with config values if needed
+    print("Loading configuration...")
+    print(args)
+    args.opts = []  # Empty list for additional config options
+    args.pretrained_weights = ""
+    config = load_config(args.config_file)
+    
+    # Update image size from config if not explicitly set
+    if args.image_size == 112:  # default value
+        config_image_size = config.get('crops', {}).get('global_crops_size', 112)
+        if config_image_size != 112:
+            args.image_size = config_image_size
+            print(f"Updated image size from config: {args.image_size}")
+    
+    print(f"Using image size: {args.image_size}")
+    print(f"Using config file: {args.config_file}")
+
+    # Load images and pre-process them
+    input_tensor, input_channels = prepare_input_images(args)
+    input_tensor = input_tensor.to(device)
+    
+    # Load the feature model
+    feature_model, autocast_ctx = build_model_and_feature_extractor(args, input_channels)
+
+    pred_ages = []           # Age predicted per model
+    for ckpt_path in predict_config["model_list"]:
+        print(f"[INFO] Loading checkpoint: {ckpt_path}")
+        regressor, best_name = build_regressor_from_ckpt(ckpt_path, feature_model, input_channels)
+
+        with torch.no_grad(): #, autocast_ctx():
+            output_tokens = predict_reduce_tokens(
+                backbone=feature_model,
+                heads={best_name: regressor},
+                x=input_tensor.float(),
+                roi=(args.image_size,) * 3,
+                overlap=0.5,
+                sw_bs=1,
+                reduce="median",
+                create_linear_input_fn=create_linear_input
+            )
+
+        predictions = output_tokens[best_name]  # [1, num_classes]                
+        pred_age_model = predictions[0, 0]
+        pred_ages.append(pred_age_model)
+        print(f"    ↳ Predicted age: {pred_age_model:.3f}")
+        pred_ages.append(pred_age_model)
+
+    print(pred_ages)
+    ages_tensor  = torch.tensor(pred_ages)
+    predicted_age = float(ages_tensor.median().item())
+    print(f"[✓] Final ensembled age: {predicted_age:.3f}")
 
     return predicted_age
 
+
 def main():
-    """Main execution function."""
     args = parse_args()
-    
-    # Create output directory if it doesn't exist
     Path(args.output).parent.mkdir(parents=True, exist_ok=True)
-    
-    # Get age prediction
-    predicted_age = predict_age(args)
-    
-    # Create output TXT file
-    output_path = Path(args.output)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    
-    with open(output_path, "w") as f:
-        f.write(f"{predicted_age:.2f}\n")
-    
-    return 0
+
+    prob = predict(args)
+
+    with open(args.output, "w") as f:
+        f.write(f"{prob:.3f}")
+
 
 if __name__ == "__main__":
-    exit(main())
+    main()
