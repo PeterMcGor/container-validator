@@ -14,19 +14,25 @@ from yucca.functional.preprocessing import (
     reverse_preprocessing,
 )
 
-
 # Task-specific hardcoded configuration
 predict_config = {
     # Import values from task_configs
     **task1_config,
     # Add inference-specific configs
     # "model_path": "/app/models/Task001_FOMO1/mmunetvae/version_0/checkpoints/best_model.ckpt",
-    "model_list": ["/app/models/Task001_FOMO1/mmunetvae/split_0/version_0/checkpoints/best_model.ckpt",
-                   "/app/models/Task001_FOMO1/mmunetvae/split_1/version_0/checkpoints/best_model.ckpt",
-                   "/app/models/Task001_FOMO1/mmunetvae/split_2/version_0/checkpoints/best_model.ckpt",
-                   "/app/models/Task001_FOMO1/mmunetvae/split_3/version_0/checkpoints/best_model.ckpt",
-                   "/app/models/Task001_FOMO1/mmunetvae/split_4/version_0/checkpoints/best_model.ckpt",
-                   ],
+    # "model_list": ["/app/models/Task001_FOMO1/mmunetvae/split_0/version_0/checkpoints/best_model.ckpt",
+    #                "/app/models/Task001_FOMO1/mmunetvae/split_1/version_0/checkpoints/best_model.ckpt",
+    #                "/app/models/Task001_FOMO1/mmunetvae/split_2/version_0/checkpoints/best_model.ckpt",
+    #                "/app/models/Task001_FOMO1/mmunetvae/split_3/version_0/checkpoints/best_model.ckpt",
+    #                "/app/models/Task001_FOMO1/mmunetvae/split_4/version_0/checkpoints/best_model.ckpt",
+    #                ],
+    "model_list": [
+        "/app/models/fold_0/best_model.ckpt",
+        "/app/models/fold_1/best_model.ckpt",
+        "/app/models/fold_2/best_model.ckpt",
+        "/app/models/fold_3/best_model.ckpt",
+        "/app/models/fold_4/best_model.ckpt",
+        ],
     "patch_size": (64, 64, 64),
 }
 
@@ -46,6 +52,21 @@ def parse_args():
     parser.add_argument("--output", type=str, required=True, help="Path to save output .txt file")
     
     return parser.parse_args()
+
+
+def robust_ensemble(preds, std_factor=2.0):
+    preds = np.array(preds)
+    mean = preds.mean()
+    std = preds.std()
+
+    mask = np.abs(preds - mean) <= std_factor * std
+    filtered = preds[mask]
+
+    if len(filtered) >= 3:  # keep majority
+        return filtered.mean()
+    else:
+        return np.median(preds)
+    
 
 def predict(args):
     """
@@ -175,9 +196,11 @@ def predict(args):
 
         probs.append(probability)
 
-    probs_tensor  = torch.tensor(probs)
-    print(probs_tensor)
-    p_mean = float(probs_tensor.mean().item())
+    # probs_tensor  = torch.tensor(probs)
+    p_mean = robust_ensemble(probs, std_factor=2.0)
+    print(f"[✓] Final ensembled infarct probability: {p_mean:.3f}")
+    #print(probs_tensor)
+    #p_mean = float(probs_tensor.mean().item())
 
     return p_mean
 

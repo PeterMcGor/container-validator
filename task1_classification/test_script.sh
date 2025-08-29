@@ -12,6 +12,7 @@ predict_script="/home/jaume/Desktop/Code/container-validator/task1_classificatio
 # --bind ${predict_script}:/app/predict.py \
 apptainer run --bind ${input_data}:/input:ro \
     --bind ${output_path}:/output \
+    --bind ${predict_script}:/app/predict.py \
     --nv \
     ${img_path} \
     --flair /input/flair.nii.gz \

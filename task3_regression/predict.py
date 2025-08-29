@@ -4,6 +4,7 @@ FOMO25 Challenge - Task 3: Brain Age Prediction (Regression)
 """
 import argparse
 import pandas as pd
+import numpy as np
 from pathlib import Path
 
 import torch
@@ -25,12 +26,19 @@ predict_config = {
     **task3_config,
     # Add inference-specific configs
     # "model_path": "/app/models/Task003_FOMO3/mmunetvae/version_0/checkpoints/best_model.ckpt",
-    "model_list": ["/app/models/Task003_FOMO3/mmunetvae/split_0/version_0/checkpoints/best_model.ckpt",
-                   "/app/models/Task003_FOMO3/mmunetvae/split_1/version_0/checkpoints/best_model.ckpt",
-                   "/app/models/Task003_FOMO3/mmunetvae/split_2/version_0/checkpoints/best_model.ckpt",
-                   "/app/models/Task003_FOMO3/mmunetvae/split_3/version_0/checkpoints/best_model.ckpt",
-                   "/app/models/Task003_FOMO3/mmunetvae/split_4/version_0/checkpoints/best_model.ckpt",
-                   ],
+    # "model_list": ["/app/models/Task003_FOMO3/mmunetvae/split_0/version_0/checkpoints/best_model.ckpt",
+    #                "/app/models/Task003_FOMO3/mmunetvae/split_1/version_0/checkpoints/best_model.ckpt",
+    #                "/app/models/Task003_FOMO3/mmunetvae/split_2/version_0/checkpoints/best_model.ckpt",
+    #                "/app/models/Task003_FOMO3/mmunetvae/split_3/version_0/checkpoints/best_model.ckpt",
+    #                "/app/models/Task003_FOMO3/mmunetvae/split_4/version_0/checkpoints/best_model.ckpt",
+    #                ],
+    "model_list": [
+        "/app/models/fold_0/best_model.ckpt",
+        "/app/models/fold_1/best_model.ckpt",
+        "/app/models/fold_2/best_model.ckpt",
+        "/app/models/fold_3/best_model.ckpt",
+        "/app/models/fold_4/best_model.ckpt",
+        ],
     "patch_size": (64, 64, 64),
 }
 
@@ -48,6 +56,29 @@ def parse_args():
     parser.add_argument("--output", type=str, required=True, help="Path to save output CSV")
     
     return parser.parse_args()
+
+
+def robust_ensemble(preds, std_factor=2.0):
+    preds = np.array(preds)
+    mean = preds.mean()
+    std = preds.std()
+
+    # Hard filter: drop implausible ages
+    preds[preds <= 18] = 18
+    preds[preds >= 100] = 100
+    # preds = preds[(preds >= 18) & (preds <= 100)]
+    # if len(preds) == 0:
+    #     print("All predictions were filtered out (<18 or >100).")
+    #     return 50  # Some average age
+
+    mask = np.abs(preds - mean) <= std_factor * std
+    filtered = preds[mask]
+
+    if len(filtered) >= 3:  # keep majority
+        return filtered.mean()
+    else:
+        return np.median(preds)
+    
 
 def predict_age(args):
     """
@@ -152,9 +183,12 @@ def predict_age(args):
         pred_ages.append(pred_age_model)
 
     # Take mean age?
-    print(pred_ages)
-    ages_tensor  = torch.tensor(pred_ages)
-    predicted_age = float(ages_tensor.median().item())
+    # print(pred_ages)
+    # ages_tensor  = torch.tensor(pred_ages)
+    # predicted_age = float(ages_tensor.median().item())
+    ages_tensor  = torch.tensor(pred_ages).cpu()
+    # predicted_age = float(ages_tensor.median().item())
+    predicted_age = robust_ensemble(ages_tensor, std_factor=2.0)
 
     return predicted_age
 

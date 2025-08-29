@@ -8,7 +8,7 @@ task2_img="/media/jaume/DATA/Data/SingularityImagesFOMO/segmentation.sif"
 task3_img="/media/jaume/DATA/Data/SingularityImagesFOMO/brain_age.sif"
 
 output_path1="/media/jaume/DATA/Data/fomo25/fomo-task1-val/predictions_validator_ft"
-output_path2="/media/jaume/DATA/Data/fomo25/fomo-task2-val/predictions_validator_ft_mirror_05"
+output_path2="/media/jaume/DATA/Data/fomo25/fomo-task2-val/predictions_validator_ft"
 output_path3="/media/jaume/DATA/Data/fomo25/fomo-task3-val/predictions_validator_ft"
 
 # # Command to run full validation on task 1 (infarct detection)

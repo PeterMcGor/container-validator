@@ -27,12 +27,19 @@ predict_config = {
     **task2_config,
     # Add inference-specific configs
     # "model_path": "/app/models/Task002_FOMO2/mmunetvae/version_0/checkpoints/best_model.ckpt",
-    "model_list": ["/app/models/Task002_FOMO2/mmunetvae/split_0/version_0/checkpoints/best_model.ckpt",
-                   "/app/models/Task002_FOMO2/mmunetvae/split_1/version_0/checkpoints/best_model.ckpt",
-                   "/app/models/Task002_FOMO2/mmunetvae/split_2/version_0/checkpoints/best_model.ckpt",
-                   "/app/models/Task002_FOMO2/mmunetvae/split_3/version_0/checkpoints/best_model.ckpt",
-                   "/app/models/Task002_FOMO2/mmunetvae/split_4/version_0/checkpoints/best_model.ckpt",
-                   ],
+    # "model_list": ["/app/models/Task002_FOMO2/mmunetvae/split_0/version_0/checkpoints/best_model.ckpt",
+    #                "/app/models/Task002_FOMO2/mmunetvae/split_1/version_0/checkpoints/best_model.ckpt",
+    #                "/app/models/Task002_FOMO2/mmunetvae/split_2/version_0/checkpoints/best_model.ckpt",
+    #                "/app/models/Task002_FOMO2/mmunetvae/split_3/version_0/checkpoints/best_model.ckpt",
+    #                "/app/models/Task002_FOMO2/mmunetvae/split_4/version_0/checkpoints/best_model.ckpt",
+    #                ],
+    "model_list": [
+        "/app/models/fold_0/best_model.ckpt",
+        "/app/models/fold_1/best_model.ckpt",
+        "/app/models/fold_2/best_model.ckpt",
+        "/app/models/fold_3/best_model.ckpt",
+        "/app/models/fold_4/best_model.ckpt",
+        ],
     "patch_size": (64, 64, 64),
 }
 
@@ -215,11 +222,11 @@ def predict_segmentation(args):
     # segmentation_mask = (prob_mean_orig >= 0.5).astype(np.uint8)
 
     # Optional: simple post-proc to fight speckles and holes    
-    lbl, n = ndi.label(segmentation_mask)
-    min_cc = predict_config.get("min_cc_size", 10)  # tune on val
-    for i in range(1, n+1):
-        if (lbl == i).sum() < min_cc:
-            segmentation_mask[lbl == i] = 0
+    # lbl, n = ndi.label(segmentation_mask)
+    # min_cc = predict_config.get("min_cc_size", 10)  # tune on val
+    # for i in range(1, n+1):
+    #     if (lbl == i).sum() < min_cc:
+    #         segmentation_mask[lbl == i] = 0
     # small hole fill
     # segmentation_mask = ndi.binary_fill_holes(segmentation_mask).astype(np.uint8)
 
