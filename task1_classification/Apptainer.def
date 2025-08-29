@@ -21,12 +21,25 @@ From: python:3.11-slim
 
     # Copy model [1]
     # /media/jaume/DATA/Data/fomo25_models/Task001_FOMO1 /app/models/
-    /media/jaume/T7/finetuning_exps/mimic_preprocess/task1/4channels/fold_0_sw_tf /app/models/
-    /media/jaume/T7/finetuning_exps/mimic_preprocess/task1/4channels/fold_1_sw_tf /app/models/
-    /media/jaume/T7/finetuning_exps/mimic_preprocess/task1/4channels/fold_2_sw_tf /app/models/
-    /media/jaume/T7/finetuning_exps/mimic_preprocess/task1/4channels/fold_3_sw_tf /app/models/
-    /media/jaume/T7/finetuning_exps/mimic_preprocess/task1/4channels/fold_4_sw_tf /app/models/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task1/4channels/fold_0_sw_tf/best_val.pth /app/models/fold_0_sw_ch/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task1/4channels/fold_0_sw_tf/results_eval_regression.json /app/models/fold_0_sw_ch/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task1/4channels/fold_0_sw_tf/eval_results/calibration_params.pkl /app/models/fold_0_sw_ch/
 
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task1/4channels/fold_1_sw_tf/best_val.pth /app/models/fold_1_sw_ch/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task1/4channels/fold_1_sw_tf/results_eval_regression.json /app/models/fold_1_sw_ch/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task1/4channels/fold_1_sw_tf/eval_results/calibration_params.pkl /app/models/fold_1_sw_ch/
+
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task1/4channels/fold_2_sw_tf/best_val.pth /app/models/fold_2_sw_ch/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task1/4channels/fold_2_sw_tf/results_eval_regression.json /app/models/fold_2_sw_ch/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task1/4channels/fold_2_sw_tf/eval_results/calibration_params.pkl /app/models/fold_2_sw_ch/
+
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task1/4channels/fold_3_sw_tf/best_val.pth /app/models/fold_3_sw_ch/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task1/4channels/fold_3_sw_tf/results_eval_regression.json /app/models/fold_3_sw_ch/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task1/4channels/fold_3_sw_tf/eval_results/calibration_params.pkl /app/models/fold_3_sw_ch/
+
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task1/4channels/fold_4_sw_tf/best_val.pth /app/models/fold_4_sw_ch/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task1/4channels/fold_4_sw_tf/results_eval_regression.json /app/models/fold_4_sw_ch/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task1/4channels/fold_4_sw_tf/eval_results/calibration_params.pkl /app/models/fold_4_sw_ch/
 %post
     # Create necessary directories
     mkdir -p /input /output /app

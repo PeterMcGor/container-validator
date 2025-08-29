@@ -8,6 +8,8 @@ output_path="/media/jaume/DATA/Data/fomo25/fomo-task2-val/predictions"
 mkdir -p ${output_path}
 
 predict_script="/home/jaume/Desktop/Code/container-validator_dino/task2_segmentation/predict.py"
+echo "Running prediction for ${subject_id}..."
+start_time=$(date +%s)
 
 # --bind ${predict_script}:/app/predict.py \
 apptainer run --bind ${input_data}:/input:ro \
@@ -20,7 +22,10 @@ apptainer run --bind ${input_data}:/input:ro \
     --t2s /input/t2s.nii.gz \
     --output /output/${subject_id}.nii.gz
 
+end_time=$(date +%s)
+elapsed=$((end_time - start_time))
 
+echo "Finished ${subject_id} in ${elapsed} seconds"
 # ===== Loop =====
 # img_path="/media/jaume/DATA/Data/SingularityImagesFOMO/segmentation.sif"
 # input_root="/home/jaume/Desktop/Code/container-validator/fake_data/fomo25/fomo-task2-val/preprocessed"

@@ -1,6 +1,7 @@
 #!/bin/bash
 
 img_path="/media/jaume/DATA/Data/SingularityImagesFOMO_DINO/brain_age.sif"
+# img_path="/media/jaume/DATA/Data/SingularityImagesFOMO_DINO/brain_age_dino_em.sif"
 
 subject_id="sub_2"
 input_data="/home/jaume/Desktop/Code/container-validator/fake_data/fomo25/fomo-task3-val/preprocessed/sub_2/ses_1"
@@ -8,6 +9,8 @@ output_path="/media/jaume/DATA/Data/fomo25/fomo-task3-val/predictions"
 mkdir -p ${output_path}
 
 predict_script="/home/jaume/Desktop/Code/container-validator_dino/task3_regression/predict.py"
+echo "Running prediction for ${subject_id}..."
+start_time=$(date +%s)
 
 # --bind ${predict_script}:/app/predict.py \
 apptainer run --bind ${input_data}:/input:ro \
@@ -19,7 +22,10 @@ apptainer run --bind ${input_data}:/input:ro \
     --t2 /input/t2.nii.gz \
     --output /output/${subject_id}.txt
 
+end_time=$(date +%s)
+elapsed=$((end_time - start_time))
 
+echo "Finished ${subject_id} in ${elapsed} seconds"
 # # ===== Loop =====
 # mg_path="/media/jaume/DATA/Data/SingularityImagesFOMO/classification.sif"
 # input_root="/home/jaume/Desktop/Code/container-validator/fake_data/fomo25/fomo-task3-val/preprocessed"

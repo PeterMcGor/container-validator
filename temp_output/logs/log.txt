@@ -1,0 +1,3243 @@
+I20250829 22:26:33 180524 dinov2 config.py:61] git:
+  sha: N/A, status: clean, branch: N/A
+
+I20250829 22:26:33 180524 dinov2 config.py:62] arch: vit_large
+cache_dir: ./temp_cache
+config_file: /app/dinov2/configs/train/vit3d_highres.yaml
+jepa_learning: False
+opts: ['train.output_dir=/home/jaume/Desktop/Code/container-validator_dino/temp_output', 'train.cache_dir=./temp_cache']
+output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+patch_size: 16
+pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+I20250829 22:26:33 180524 dinov2 config.py:27] sqrt scaling learning rate; base: 0.001, new: 0.00025
+I20250829 22:26:33 180524 dinov2 config.py:34] MODEL:
+  WEIGHTS: ''
+compute_precision:
+  grad_scaler: true
+  teacher:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+  student:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+dino:
+  loss_weight: 1.0
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+  koleo_loss_weight: 0.1
+ibot:
+  loss_weight: 1.0
+  mask_sample_probability: 0.5
+  mask_ratio_min_max:
+  - 0.2
+  - 0.75
+  separate_head: true
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+train:
+  batch_size_per_gpu: 64
+  data_min_axis_size: 48
+  dataset_path: /home/jovyan/workspace/3D-DINO/openmind_v2_clean_v2.json
+  output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+  saveckp_freq: 1
+  seed: 0
+  num_workers: 4
+  OFFICIAL_EPOCH_LENGTH: 125
+  cache_dataset: true
+  centering: sinkhorn_knopp
+  cache_dir: ./temp_cache
+student:
+  arch: vit_large_3d
+  patch_size: 16
+  drop_path_rate: 0.3
+  layerscale: 1.0e-05
+  drop_path_uniform: true
+  pretrained_weights: ''
+  full_pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+  ffn_layer: mlp
+  block_chunks: 4
+  qkv_bias: true
+  proj_bias: true
+  ffn_bias: true
+teacher:
+  momentum_teacher: 0.992
+  final_momentum_teacher: 1
+  warmup_teacher_temp: 0.04
+  teacher_temp: 0.07
+  warmup_teacher_temp_epochs: 1500
+optim:
+  epochs: 5000
+  weight_decay: 0.04
+  weight_decay_end: 0.4
+  base_lr: 0.001
+  lr: 0.00025
+  warmup_epochs: 500
+  min_lr: 1.0e-06
+  clip_grad: 3.0
+  freeze_last_layer_epochs: 1
+  scaling_rule: sqrt_wrt_1024
+  patch_embed_lr_mult: 0.2
+  layerwise_decay: 0.9
+  adamw_beta1: 0.9
+  adamw_beta2: 0.999
+crops:
+  global_crops_in_slice_scale:
+  - 0.48
+  - 1.0
+  global_crops_cross_slice_scale:
+  - 0.5
+  - 1.0
+  local_crops_number: 8
+  local_crops_in_slice_scale:
+  - 0.16
+  - 0.48
+  local_crops_cross_slice_scale:
+  - 0.2
+  - 0.5
+  global_crops_size: 112
+  local_crops_size: 64
+evaluation:
+  eval_period_iterations: 3125
+
+I20250829 22:26:33 180524 dinov2 vision_transformer.py:629] using MLP layer as FFN
+W20250829 22:26:59 180524 py.warnings warnings.py:109] /opt/conda/envs/dino3d/lib/python3.9/site-packages/torch/functional.py:507: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3549.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+
+I20250829 22:29:11 186856 dinov2 config.py:61] git:
+  sha: N/A, status: clean, branch: N/A
+
+I20250829 22:29:11 186856 dinov2 config.py:62] arch: vit_large
+cache_dir: ./temp_cache
+config_file: /app/dinov2/configs/train/vit3d_highres.yaml
+jepa_learning: False
+opts: ['train.output_dir=/home/jaume/Desktop/Code/container-validator_dino/temp_output', 'train.cache_dir=./temp_cache']
+output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+patch_size: 16
+pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+I20250829 22:29:11 186856 dinov2 config.py:27] sqrt scaling learning rate; base: 0.001, new: 0.00025
+I20250829 22:29:11 186856 dinov2 config.py:34] MODEL:
+  WEIGHTS: ''
+compute_precision:
+  grad_scaler: true
+  teacher:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+  student:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+dino:
+  loss_weight: 1.0
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+  koleo_loss_weight: 0.1
+ibot:
+  loss_weight: 1.0
+  mask_sample_probability: 0.5
+  mask_ratio_min_max:
+  - 0.2
+  - 0.75
+  separate_head: true
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+train:
+  batch_size_per_gpu: 64
+  data_min_axis_size: 48
+  dataset_path: /home/jovyan/workspace/3D-DINO/openmind_v2_clean_v2.json
+  output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+  saveckp_freq: 1
+  seed: 0
+  num_workers: 4
+  OFFICIAL_EPOCH_LENGTH: 125
+  cache_dataset: true
+  centering: sinkhorn_knopp
+  cache_dir: ./temp_cache
+student:
+  arch: vit_large_3d
+  patch_size: 16
+  drop_path_rate: 0.3
+  layerscale: 1.0e-05
+  drop_path_uniform: true
+  pretrained_weights: ''
+  full_pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+  ffn_layer: mlp
+  block_chunks: 4
+  qkv_bias: true
+  proj_bias: true
+  ffn_bias: true
+teacher:
+  momentum_teacher: 0.992
+  final_momentum_teacher: 1
+  warmup_teacher_temp: 0.04
+  teacher_temp: 0.07
+  warmup_teacher_temp_epochs: 1500
+optim:
+  epochs: 5000
+  weight_decay: 0.04
+  weight_decay_end: 0.4
+  base_lr: 0.001
+  lr: 0.00025
+  warmup_epochs: 500
+  min_lr: 1.0e-06
+  clip_grad: 3.0
+  freeze_last_layer_epochs: 1
+  scaling_rule: sqrt_wrt_1024
+  patch_embed_lr_mult: 0.2
+  layerwise_decay: 0.9
+  adamw_beta1: 0.9
+  adamw_beta2: 0.999
+crops:
+  global_crops_in_slice_scale:
+  - 0.48
+  - 1.0
+  global_crops_cross_slice_scale:
+  - 0.5
+  - 1.0
+  local_crops_number: 8
+  local_crops_in_slice_scale:
+  - 0.16
+  - 0.48
+  local_crops_cross_slice_scale:
+  - 0.2
+  - 0.5
+  global_crops_size: 112
+  local_crops_size: 64
+evaluation:
+  eval_period_iterations: 3125
+
+I20250829 22:29:11 186856 dinov2 vision_transformer.py:629] using MLP layer as FFN
+W20250829 22:29:35 186856 py.warnings warnings.py:109] /opt/conda/envs/dino3d/lib/python3.9/site-packages/torch/functional.py:507: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3549.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+
+I20250829 22:31:44 193064 dinov2 config.py:61] git:
+  sha: N/A, status: clean, branch: N/A
+
+I20250829 22:31:44 193064 dinov2 config.py:62] arch: vit_large
+cache_dir: ./temp_cache
+config_file: /app/dinov2/configs/train/vit3d_highres.yaml
+jepa_learning: False
+opts: ['train.output_dir=/home/jaume/Desktop/Code/container-validator_dino/temp_output', 'train.cache_dir=./temp_cache']
+output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+patch_size: 16
+pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+I20250829 22:31:44 193064 dinov2 config.py:27] sqrt scaling learning rate; base: 0.001, new: 0.00025
+I20250829 22:31:44 193064 dinov2 config.py:34] MODEL:
+  WEIGHTS: ''
+compute_precision:
+  grad_scaler: true
+  teacher:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+  student:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+dino:
+  loss_weight: 1.0
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+  koleo_loss_weight: 0.1
+ibot:
+  loss_weight: 1.0
+  mask_sample_probability: 0.5
+  mask_ratio_min_max:
+  - 0.2
+  - 0.75
+  separate_head: true
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+train:
+  batch_size_per_gpu: 64
+  data_min_axis_size: 48
+  dataset_path: /home/jovyan/workspace/3D-DINO/openmind_v2_clean_v2.json
+  output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+  saveckp_freq: 1
+  seed: 0
+  num_workers: 4
+  OFFICIAL_EPOCH_LENGTH: 125
+  cache_dataset: true
+  centering: sinkhorn_knopp
+  cache_dir: ./temp_cache
+student:
+  arch: vit_large_3d
+  patch_size: 16
+  drop_path_rate: 0.3
+  layerscale: 1.0e-05
+  drop_path_uniform: true
+  pretrained_weights: ''
+  full_pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+  ffn_layer: mlp
+  block_chunks: 4
+  qkv_bias: true
+  proj_bias: true
+  ffn_bias: true
+teacher:
+  momentum_teacher: 0.992
+  final_momentum_teacher: 1
+  warmup_teacher_temp: 0.04
+  teacher_temp: 0.07
+  warmup_teacher_temp_epochs: 1500
+optim:
+  epochs: 5000
+  weight_decay: 0.04
+  weight_decay_end: 0.4
+  base_lr: 0.001
+  lr: 0.00025
+  warmup_epochs: 500
+  min_lr: 1.0e-06
+  clip_grad: 3.0
+  freeze_last_layer_epochs: 1
+  scaling_rule: sqrt_wrt_1024
+  patch_embed_lr_mult: 0.2
+  layerwise_decay: 0.9
+  adamw_beta1: 0.9
+  adamw_beta2: 0.999
+crops:
+  global_crops_in_slice_scale:
+  - 0.48
+  - 1.0
+  global_crops_cross_slice_scale:
+  - 0.5
+  - 1.0
+  local_crops_number: 8
+  local_crops_in_slice_scale:
+  - 0.16
+  - 0.48
+  local_crops_cross_slice_scale:
+  - 0.2
+  - 0.5
+  global_crops_size: 112
+  local_crops_size: 64
+evaluation:
+  eval_period_iterations: 3125
+
+I20250829 22:31:44 193064 dinov2 vision_transformer.py:629] using MLP layer as FFN
+W20250829 22:32:07 193064 py.warnings warnings.py:109] /opt/conda/envs/dino3d/lib/python3.9/site-packages/torch/functional.py:507: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3549.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+
+I20250829 22:34:01 198942 dinov2 config.py:61] git:
+  sha: N/A, status: clean, branch: N/A
+
+I20250829 22:34:01 198942 dinov2 config.py:62] arch: vit_large
+cache_dir: ./temp_cache
+config_file: /app/dinov2/configs/train/vit3d_highres.yaml
+jepa_learning: False
+opts: ['train.output_dir=/home/jaume/Desktop/Code/container-validator_dino/temp_output', 'train.cache_dir=./temp_cache']
+output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+patch_size: 16
+pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+I20250829 22:34:01 198942 dinov2 config.py:27] sqrt scaling learning rate; base: 0.001, new: 0.00025
+I20250829 22:34:01 198942 dinov2 config.py:34] MODEL:
+  WEIGHTS: ''
+compute_precision:
+  grad_scaler: true
+  teacher:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+  student:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+dino:
+  loss_weight: 1.0
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+  koleo_loss_weight: 0.1
+ibot:
+  loss_weight: 1.0
+  mask_sample_probability: 0.5
+  mask_ratio_min_max:
+  - 0.2
+  - 0.75
+  separate_head: true
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+train:
+  batch_size_per_gpu: 64
+  data_min_axis_size: 48
+  dataset_path: /home/jovyan/workspace/3D-DINO/openmind_v2_clean_v2.json
+  output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+  saveckp_freq: 1
+  seed: 0
+  num_workers: 4
+  OFFICIAL_EPOCH_LENGTH: 125
+  cache_dataset: true
+  centering: sinkhorn_knopp
+  cache_dir: ./temp_cache
+student:
+  arch: vit_large_3d
+  patch_size: 16
+  drop_path_rate: 0.3
+  layerscale: 1.0e-05
+  drop_path_uniform: true
+  pretrained_weights: ''
+  full_pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+  ffn_layer: mlp
+  block_chunks: 4
+  qkv_bias: true
+  proj_bias: true
+  ffn_bias: true
+teacher:
+  momentum_teacher: 0.992
+  final_momentum_teacher: 1
+  warmup_teacher_temp: 0.04
+  teacher_temp: 0.07
+  warmup_teacher_temp_epochs: 1500
+optim:
+  epochs: 5000
+  weight_decay: 0.04
+  weight_decay_end: 0.4
+  base_lr: 0.001
+  lr: 0.00025
+  warmup_epochs: 500
+  min_lr: 1.0e-06
+  clip_grad: 3.0
+  freeze_last_layer_epochs: 1
+  scaling_rule: sqrt_wrt_1024
+  patch_embed_lr_mult: 0.2
+  layerwise_decay: 0.9
+  adamw_beta1: 0.9
+  adamw_beta2: 0.999
+crops:
+  global_crops_in_slice_scale:
+  - 0.48
+  - 1.0
+  global_crops_cross_slice_scale:
+  - 0.5
+  - 1.0
+  local_crops_number: 8
+  local_crops_in_slice_scale:
+  - 0.16
+  - 0.48
+  local_crops_cross_slice_scale:
+  - 0.2
+  - 0.5
+  global_crops_size: 112
+  local_crops_size: 64
+evaluation:
+  eval_period_iterations: 3125
+
+I20250829 22:34:01 198942 dinov2 vision_transformer.py:629] using MLP layer as FFN
+W20250829 22:34:21 198942 py.warnings warnings.py:109] /opt/conda/envs/dino3d/lib/python3.9/site-packages/torch/functional.py:507: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3549.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+
+I20250829 22:36:23 204641 dinov2 config.py:61] git:
+  sha: N/A, status: clean, branch: N/A
+
+I20250829 22:36:23 204641 dinov2 config.py:62] arch: vit_large
+cache_dir: ./temp_cache
+config_file: /app/dinov2/configs/train/vit3d_highres.yaml
+jepa_learning: False
+opts: ['train.output_dir=/home/jaume/Desktop/Code/container-validator_dino/temp_output', 'train.cache_dir=./temp_cache']
+output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+patch_size: 16
+pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+I20250829 22:36:23 204641 dinov2 config.py:27] sqrt scaling learning rate; base: 0.001, new: 0.00025
+I20250829 22:36:23 204641 dinov2 config.py:34] MODEL:
+  WEIGHTS: ''
+compute_precision:
+  grad_scaler: true
+  teacher:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+  student:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+dino:
+  loss_weight: 1.0
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+  koleo_loss_weight: 0.1
+ibot:
+  loss_weight: 1.0
+  mask_sample_probability: 0.5
+  mask_ratio_min_max:
+  - 0.2
+  - 0.75
+  separate_head: true
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+train:
+  batch_size_per_gpu: 64
+  data_min_axis_size: 48
+  dataset_path: /home/jovyan/workspace/3D-DINO/openmind_v2_clean_v2.json
+  output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+  saveckp_freq: 1
+  seed: 0
+  num_workers: 4
+  OFFICIAL_EPOCH_LENGTH: 125
+  cache_dataset: true
+  centering: sinkhorn_knopp
+  cache_dir: ./temp_cache
+student:
+  arch: vit_large_3d
+  patch_size: 16
+  drop_path_rate: 0.3
+  layerscale: 1.0e-05
+  drop_path_uniform: true
+  pretrained_weights: ''
+  full_pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+  ffn_layer: mlp
+  block_chunks: 4
+  qkv_bias: true
+  proj_bias: true
+  ffn_bias: true
+teacher:
+  momentum_teacher: 0.992
+  final_momentum_teacher: 1
+  warmup_teacher_temp: 0.04
+  teacher_temp: 0.07
+  warmup_teacher_temp_epochs: 1500
+optim:
+  epochs: 5000
+  weight_decay: 0.04
+  weight_decay_end: 0.4
+  base_lr: 0.001
+  lr: 0.00025
+  warmup_epochs: 500
+  min_lr: 1.0e-06
+  clip_grad: 3.0
+  freeze_last_layer_epochs: 1
+  scaling_rule: sqrt_wrt_1024
+  patch_embed_lr_mult: 0.2
+  layerwise_decay: 0.9
+  adamw_beta1: 0.9
+  adamw_beta2: 0.999
+crops:
+  global_crops_in_slice_scale:
+  - 0.48
+  - 1.0
+  global_crops_cross_slice_scale:
+  - 0.5
+  - 1.0
+  local_crops_number: 8
+  local_crops_in_slice_scale:
+  - 0.16
+  - 0.48
+  local_crops_cross_slice_scale:
+  - 0.2
+  - 0.5
+  global_crops_size: 112
+  local_crops_size: 64
+evaluation:
+  eval_period_iterations: 3125
+
+I20250829 22:36:23 204641 dinov2 vision_transformer.py:629] using MLP layer as FFN
+W20250829 22:36:42 204641 py.warnings warnings.py:109] /opt/conda/envs/dino3d/lib/python3.9/site-packages/torch/functional.py:507: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3549.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+
+I20250829 22:38:46 210594 dinov2 config.py:61] git:
+  sha: N/A, status: clean, branch: N/A
+
+I20250829 22:38:46 210594 dinov2 config.py:62] arch: vit_large
+cache_dir: ./temp_cache
+config_file: /app/dinov2/configs/train/vit3d_highres.yaml
+jepa_learning: False
+opts: ['train.output_dir=/home/jaume/Desktop/Code/container-validator_dino/temp_output', 'train.cache_dir=./temp_cache']
+output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+patch_size: 16
+pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+I20250829 22:38:46 210594 dinov2 config.py:27] sqrt scaling learning rate; base: 0.001, new: 0.00025
+I20250829 22:38:46 210594 dinov2 config.py:34] MODEL:
+  WEIGHTS: ''
+compute_precision:
+  grad_scaler: true
+  teacher:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+  student:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+dino:
+  loss_weight: 1.0
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+  koleo_loss_weight: 0.1
+ibot:
+  loss_weight: 1.0
+  mask_sample_probability: 0.5
+  mask_ratio_min_max:
+  - 0.2
+  - 0.75
+  separate_head: true
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+train:
+  batch_size_per_gpu: 64
+  data_min_axis_size: 48
+  dataset_path: /home/jovyan/workspace/3D-DINO/openmind_v2_clean_v2.json
+  output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+  saveckp_freq: 1
+  seed: 0
+  num_workers: 4
+  OFFICIAL_EPOCH_LENGTH: 125
+  cache_dataset: true
+  centering: sinkhorn_knopp
+  cache_dir: ./temp_cache
+student:
+  arch: vit_large_3d
+  patch_size: 16
+  drop_path_rate: 0.3
+  layerscale: 1.0e-05
+  drop_path_uniform: true
+  pretrained_weights: ''
+  full_pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+  ffn_layer: mlp
+  block_chunks: 4
+  qkv_bias: true
+  proj_bias: true
+  ffn_bias: true
+teacher:
+  momentum_teacher: 0.992
+  final_momentum_teacher: 1
+  warmup_teacher_temp: 0.04
+  teacher_temp: 0.07
+  warmup_teacher_temp_epochs: 1500
+optim:
+  epochs: 5000
+  weight_decay: 0.04
+  weight_decay_end: 0.4
+  base_lr: 0.001
+  lr: 0.00025
+  warmup_epochs: 500
+  min_lr: 1.0e-06
+  clip_grad: 3.0
+  freeze_last_layer_epochs: 1
+  scaling_rule: sqrt_wrt_1024
+  patch_embed_lr_mult: 0.2
+  layerwise_decay: 0.9
+  adamw_beta1: 0.9
+  adamw_beta2: 0.999
+crops:
+  global_crops_in_slice_scale:
+  - 0.48
+  - 1.0
+  global_crops_cross_slice_scale:
+  - 0.5
+  - 1.0
+  local_crops_number: 8
+  local_crops_in_slice_scale:
+  - 0.16
+  - 0.48
+  local_crops_cross_slice_scale:
+  - 0.2
+  - 0.5
+  global_crops_size: 112
+  local_crops_size: 64
+evaluation:
+  eval_period_iterations: 3125
+
+I20250829 22:38:46 210594 dinov2 vision_transformer.py:629] using MLP layer as FFN
+W20250829 22:39:06 210594 py.warnings warnings.py:109] /opt/conda/envs/dino3d/lib/python3.9/site-packages/torch/functional.py:507: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3549.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+
+I20250829 22:41:08 216359 dinov2 config.py:61] git:
+  sha: N/A, status: clean, branch: N/A
+
+I20250829 22:41:08 216359 dinov2 config.py:62] arch: vit_large
+cache_dir: ./temp_cache
+config_file: /app/dinov2/configs/train/vit3d_highres.yaml
+jepa_learning: False
+opts: ['train.output_dir=/home/jaume/Desktop/Code/container-validator_dino/temp_output', 'train.cache_dir=./temp_cache']
+output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+patch_size: 16
+pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+I20250829 22:41:08 216359 dinov2 config.py:27] sqrt scaling learning rate; base: 0.001, new: 0.00025
+I20250829 22:41:08 216359 dinov2 config.py:34] MODEL:
+  WEIGHTS: ''
+compute_precision:
+  grad_scaler: true
+  teacher:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+  student:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+dino:
+  loss_weight: 1.0
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+  koleo_loss_weight: 0.1
+ibot:
+  loss_weight: 1.0
+  mask_sample_probability: 0.5
+  mask_ratio_min_max:
+  - 0.2
+  - 0.75
+  separate_head: true
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+train:
+  batch_size_per_gpu: 64
+  data_min_axis_size: 48
+  dataset_path: /home/jovyan/workspace/3D-DINO/openmind_v2_clean_v2.json
+  output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+  saveckp_freq: 1
+  seed: 0
+  num_workers: 4
+  OFFICIAL_EPOCH_LENGTH: 125
+  cache_dataset: true
+  centering: sinkhorn_knopp
+  cache_dir: ./temp_cache
+student:
+  arch: vit_large_3d
+  patch_size: 16
+  drop_path_rate: 0.3
+  layerscale: 1.0e-05
+  drop_path_uniform: true
+  pretrained_weights: ''
+  full_pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+  ffn_layer: mlp
+  block_chunks: 4
+  qkv_bias: true
+  proj_bias: true
+  ffn_bias: true
+teacher:
+  momentum_teacher: 0.992
+  final_momentum_teacher: 1
+  warmup_teacher_temp: 0.04
+  teacher_temp: 0.07
+  warmup_teacher_temp_epochs: 1500
+optim:
+  epochs: 5000
+  weight_decay: 0.04
+  weight_decay_end: 0.4
+  base_lr: 0.001
+  lr: 0.00025
+  warmup_epochs: 500
+  min_lr: 1.0e-06
+  clip_grad: 3.0
+  freeze_last_layer_epochs: 1
+  scaling_rule: sqrt_wrt_1024
+  patch_embed_lr_mult: 0.2
+  layerwise_decay: 0.9
+  adamw_beta1: 0.9
+  adamw_beta2: 0.999
+crops:
+  global_crops_in_slice_scale:
+  - 0.48
+  - 1.0
+  global_crops_cross_slice_scale:
+  - 0.5
+  - 1.0
+  local_crops_number: 8
+  local_crops_in_slice_scale:
+  - 0.16
+  - 0.48
+  local_crops_cross_slice_scale:
+  - 0.2
+  - 0.5
+  global_crops_size: 112
+  local_crops_size: 64
+evaluation:
+  eval_period_iterations: 3125
+
+I20250829 22:41:08 216359 dinov2 vision_transformer.py:629] using MLP layer as FFN
+W20250829 22:41:26 216359 py.warnings warnings.py:109] /opt/conda/envs/dino3d/lib/python3.9/site-packages/torch/functional.py:507: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3549.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+
+I20250829 22:43:24 222136 dinov2 config.py:61] git:
+  sha: N/A, status: clean, branch: N/A
+
+I20250829 22:43:24 222136 dinov2 config.py:62] arch: vit_large
+cache_dir: ./temp_cache
+config_file: /app/dinov2/configs/train/vit3d_highres.yaml
+jepa_learning: False
+opts: ['train.output_dir=/home/jaume/Desktop/Code/container-validator_dino/temp_output', 'train.cache_dir=./temp_cache']
+output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+patch_size: 16
+pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+I20250829 22:43:24 222136 dinov2 config.py:27] sqrt scaling learning rate; base: 0.001, new: 0.00025
+I20250829 22:43:24 222136 dinov2 config.py:34] MODEL:
+  WEIGHTS: ''
+compute_precision:
+  grad_scaler: true
+  teacher:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+  student:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+dino:
+  loss_weight: 1.0
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+  koleo_loss_weight: 0.1
+ibot:
+  loss_weight: 1.0
+  mask_sample_probability: 0.5
+  mask_ratio_min_max:
+  - 0.2
+  - 0.75
+  separate_head: true
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+train:
+  batch_size_per_gpu: 64
+  data_min_axis_size: 48
+  dataset_path: /home/jovyan/workspace/3D-DINO/openmind_v2_clean_v2.json
+  output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+  saveckp_freq: 1
+  seed: 0
+  num_workers: 4
+  OFFICIAL_EPOCH_LENGTH: 125
+  cache_dataset: true
+  centering: sinkhorn_knopp
+  cache_dir: ./temp_cache
+student:
+  arch: vit_large_3d
+  patch_size: 16
+  drop_path_rate: 0.3
+  layerscale: 1.0e-05
+  drop_path_uniform: true
+  pretrained_weights: ''
+  full_pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+  ffn_layer: mlp
+  block_chunks: 4
+  qkv_bias: true
+  proj_bias: true
+  ffn_bias: true
+teacher:
+  momentum_teacher: 0.992
+  final_momentum_teacher: 1
+  warmup_teacher_temp: 0.04
+  teacher_temp: 0.07
+  warmup_teacher_temp_epochs: 1500
+optim:
+  epochs: 5000
+  weight_decay: 0.04
+  weight_decay_end: 0.4
+  base_lr: 0.001
+  lr: 0.00025
+  warmup_epochs: 500
+  min_lr: 1.0e-06
+  clip_grad: 3.0
+  freeze_last_layer_epochs: 1
+  scaling_rule: sqrt_wrt_1024
+  patch_embed_lr_mult: 0.2
+  layerwise_decay: 0.9
+  adamw_beta1: 0.9
+  adamw_beta2: 0.999
+crops:
+  global_crops_in_slice_scale:
+  - 0.48
+  - 1.0
+  global_crops_cross_slice_scale:
+  - 0.5
+  - 1.0
+  local_crops_number: 8
+  local_crops_in_slice_scale:
+  - 0.16
+  - 0.48
+  local_crops_cross_slice_scale:
+  - 0.2
+  - 0.5
+  global_crops_size: 112
+  local_crops_size: 64
+evaluation:
+  eval_period_iterations: 3125
+
+I20250829 22:43:24 222136 dinov2 vision_transformer.py:629] using MLP layer as FFN
+W20250829 22:43:44 222136 py.warnings warnings.py:109] /opt/conda/envs/dino3d/lib/python3.9/site-packages/torch/functional.py:507: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3549.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+
+I20250829 22:45:48 227805 dinov2 config.py:61] git:
+  sha: N/A, status: clean, branch: N/A
+
+I20250829 22:45:48 227805 dinov2 config.py:62] arch: vit_large
+cache_dir: ./temp_cache
+config_file: /app/dinov2/configs/train/vit3d_highres.yaml
+jepa_learning: False
+opts: ['train.output_dir=/home/jaume/Desktop/Code/container-validator_dino/temp_output', 'train.cache_dir=./temp_cache']
+output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+patch_size: 16
+pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+I20250829 22:45:48 227805 dinov2 config.py:27] sqrt scaling learning rate; base: 0.001, new: 0.00025
+I20250829 22:45:48 227805 dinov2 config.py:34] MODEL:
+  WEIGHTS: ''
+compute_precision:
+  grad_scaler: true
+  teacher:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+  student:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+dino:
+  loss_weight: 1.0
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+  koleo_loss_weight: 0.1
+ibot:
+  loss_weight: 1.0
+  mask_sample_probability: 0.5
+  mask_ratio_min_max:
+  - 0.2
+  - 0.75
+  separate_head: true
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+train:
+  batch_size_per_gpu: 64
+  data_min_axis_size: 48
+  dataset_path: /home/jovyan/workspace/3D-DINO/openmind_v2_clean_v2.json
+  output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+  saveckp_freq: 1
+  seed: 0
+  num_workers: 4
+  OFFICIAL_EPOCH_LENGTH: 125
+  cache_dataset: true
+  centering: sinkhorn_knopp
+  cache_dir: ./temp_cache
+student:
+  arch: vit_large_3d
+  patch_size: 16
+  drop_path_rate: 0.3
+  layerscale: 1.0e-05
+  drop_path_uniform: true
+  pretrained_weights: ''
+  full_pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+  ffn_layer: mlp
+  block_chunks: 4
+  qkv_bias: true
+  proj_bias: true
+  ffn_bias: true
+teacher:
+  momentum_teacher: 0.992
+  final_momentum_teacher: 1
+  warmup_teacher_temp: 0.04
+  teacher_temp: 0.07
+  warmup_teacher_temp_epochs: 1500
+optim:
+  epochs: 5000
+  weight_decay: 0.04
+  weight_decay_end: 0.4
+  base_lr: 0.001
+  lr: 0.00025
+  warmup_epochs: 500
+  min_lr: 1.0e-06
+  clip_grad: 3.0
+  freeze_last_layer_epochs: 1
+  scaling_rule: sqrt_wrt_1024
+  patch_embed_lr_mult: 0.2
+  layerwise_decay: 0.9
+  adamw_beta1: 0.9
+  adamw_beta2: 0.999
+crops:
+  global_crops_in_slice_scale:
+  - 0.48
+  - 1.0
+  global_crops_cross_slice_scale:
+  - 0.5
+  - 1.0
+  local_crops_number: 8
+  local_crops_in_slice_scale:
+  - 0.16
+  - 0.48
+  local_crops_cross_slice_scale:
+  - 0.2
+  - 0.5
+  global_crops_size: 112
+  local_crops_size: 64
+evaluation:
+  eval_period_iterations: 3125
+
+I20250829 22:45:48 227805 dinov2 vision_transformer.py:629] using MLP layer as FFN
+W20250829 22:46:08 227805 py.warnings warnings.py:109] /opt/conda/envs/dino3d/lib/python3.9/site-packages/torch/functional.py:507: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3549.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+
+I20250829 22:48:08 233742 dinov2 config.py:61] git:
+  sha: N/A, status: clean, branch: N/A
+
+I20250829 22:48:08 233742 dinov2 config.py:62] arch: vit_large
+cache_dir: ./temp_cache
+config_file: /app/dinov2/configs/train/vit3d_highres.yaml
+jepa_learning: False
+opts: ['train.output_dir=/home/jaume/Desktop/Code/container-validator_dino/temp_output', 'train.cache_dir=./temp_cache']
+output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+patch_size: 16
+pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+I20250829 22:48:08 233742 dinov2 config.py:27] sqrt scaling learning rate; base: 0.001, new: 0.00025
+I20250829 22:48:08 233742 dinov2 config.py:34] MODEL:
+  WEIGHTS: ''
+compute_precision:
+  grad_scaler: true
+  teacher:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+  student:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+dino:
+  loss_weight: 1.0
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+  koleo_loss_weight: 0.1
+ibot:
+  loss_weight: 1.0
+  mask_sample_probability: 0.5
+  mask_ratio_min_max:
+  - 0.2
+  - 0.75
+  separate_head: true
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+train:
+  batch_size_per_gpu: 64
+  data_min_axis_size: 48
+  dataset_path: /home/jovyan/workspace/3D-DINO/openmind_v2_clean_v2.json
+  output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+  saveckp_freq: 1
+  seed: 0
+  num_workers: 4
+  OFFICIAL_EPOCH_LENGTH: 125
+  cache_dataset: true
+  centering: sinkhorn_knopp
+  cache_dir: ./temp_cache
+student:
+  arch: vit_large_3d
+  patch_size: 16
+  drop_path_rate: 0.3
+  layerscale: 1.0e-05
+  drop_path_uniform: true
+  pretrained_weights: ''
+  full_pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+  ffn_layer: mlp
+  block_chunks: 4
+  qkv_bias: true
+  proj_bias: true
+  ffn_bias: true
+teacher:
+  momentum_teacher: 0.992
+  final_momentum_teacher: 1
+  warmup_teacher_temp: 0.04
+  teacher_temp: 0.07
+  warmup_teacher_temp_epochs: 1500
+optim:
+  epochs: 5000
+  weight_decay: 0.04
+  weight_decay_end: 0.4
+  base_lr: 0.001
+  lr: 0.00025
+  warmup_epochs: 500
+  min_lr: 1.0e-06
+  clip_grad: 3.0
+  freeze_last_layer_epochs: 1
+  scaling_rule: sqrt_wrt_1024
+  patch_embed_lr_mult: 0.2
+  layerwise_decay: 0.9
+  adamw_beta1: 0.9
+  adamw_beta2: 0.999
+crops:
+  global_crops_in_slice_scale:
+  - 0.48
+  - 1.0
+  global_crops_cross_slice_scale:
+  - 0.5
+  - 1.0
+  local_crops_number: 8
+  local_crops_in_slice_scale:
+  - 0.16
+  - 0.48
+  local_crops_cross_slice_scale:
+  - 0.2
+  - 0.5
+  global_crops_size: 112
+  local_crops_size: 64
+evaluation:
+  eval_period_iterations: 3125
+
+I20250829 22:48:08 233742 dinov2 vision_transformer.py:629] using MLP layer as FFN
+W20250829 22:48:27 233742 py.warnings warnings.py:109] /opt/conda/envs/dino3d/lib/python3.9/site-packages/torch/functional.py:507: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3549.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+
+I20250829 22:50:30 239722 dinov2 config.py:61] git:
+  sha: N/A, status: clean, branch: N/A
+
+I20250829 22:50:30 239722 dinov2 config.py:62] arch: vit_large
+cache_dir: ./temp_cache
+config_file: /app/dinov2/configs/train/vit3d_highres.yaml
+jepa_learning: False
+opts: ['train.output_dir=/home/jaume/Desktop/Code/container-validator_dino/temp_output', 'train.cache_dir=./temp_cache']
+output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+patch_size: 16
+pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+I20250829 22:50:30 239722 dinov2 config.py:27] sqrt scaling learning rate; base: 0.001, new: 0.00025
+I20250829 22:50:30 239722 dinov2 config.py:34] MODEL:
+  WEIGHTS: ''
+compute_precision:
+  grad_scaler: true
+  teacher:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+  student:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+dino:
+  loss_weight: 1.0
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+  koleo_loss_weight: 0.1
+ibot:
+  loss_weight: 1.0
+  mask_sample_probability: 0.5
+  mask_ratio_min_max:
+  - 0.2
+  - 0.75
+  separate_head: true
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+train:
+  batch_size_per_gpu: 64
+  data_min_axis_size: 48
+  dataset_path: /home/jovyan/workspace/3D-DINO/openmind_v2_clean_v2.json
+  output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+  saveckp_freq: 1
+  seed: 0
+  num_workers: 4
+  OFFICIAL_EPOCH_LENGTH: 125
+  cache_dataset: true
+  centering: sinkhorn_knopp
+  cache_dir: ./temp_cache
+student:
+  arch: vit_large_3d
+  patch_size: 16
+  drop_path_rate: 0.3
+  layerscale: 1.0e-05
+  drop_path_uniform: true
+  pretrained_weights: ''
+  full_pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+  ffn_layer: mlp
+  block_chunks: 4
+  qkv_bias: true
+  proj_bias: true
+  ffn_bias: true
+teacher:
+  momentum_teacher: 0.992
+  final_momentum_teacher: 1
+  warmup_teacher_temp: 0.04
+  teacher_temp: 0.07
+  warmup_teacher_temp_epochs: 1500
+optim:
+  epochs: 5000
+  weight_decay: 0.04
+  weight_decay_end: 0.4
+  base_lr: 0.001
+  lr: 0.00025
+  warmup_epochs: 500
+  min_lr: 1.0e-06
+  clip_grad: 3.0
+  freeze_last_layer_epochs: 1
+  scaling_rule: sqrt_wrt_1024
+  patch_embed_lr_mult: 0.2
+  layerwise_decay: 0.9
+  adamw_beta1: 0.9
+  adamw_beta2: 0.999
+crops:
+  global_crops_in_slice_scale:
+  - 0.48
+  - 1.0
+  global_crops_cross_slice_scale:
+  - 0.5
+  - 1.0
+  local_crops_number: 8
+  local_crops_in_slice_scale:
+  - 0.16
+  - 0.48
+  local_crops_cross_slice_scale:
+  - 0.2
+  - 0.5
+  global_crops_size: 112
+  local_crops_size: 64
+evaluation:
+  eval_period_iterations: 3125
+
+I20250829 22:50:30 239722 dinov2 vision_transformer.py:629] using MLP layer as FFN
+W20250829 22:51:02 239722 py.warnings warnings.py:109] /opt/conda/envs/dino3d/lib/python3.9/site-packages/torch/functional.py:507: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3549.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+
+I20250829 22:53:22 246572 dinov2 config.py:61] git:
+  sha: N/A, status: clean, branch: N/A
+
+I20250829 22:53:22 246572 dinov2 config.py:62] arch: vit_large
+cache_dir: ./temp_cache
+config_file: /app/dinov2/configs/train/vit3d_highres.yaml
+jepa_learning: False
+opts: ['train.output_dir=/home/jaume/Desktop/Code/container-validator_dino/temp_output', 'train.cache_dir=./temp_cache']
+output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+patch_size: 16
+pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+I20250829 22:53:22 246572 dinov2 config.py:27] sqrt scaling learning rate; base: 0.001, new: 0.00025
+I20250829 22:53:22 246572 dinov2 config.py:34] MODEL:
+  WEIGHTS: ''
+compute_precision:
+  grad_scaler: true
+  teacher:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+  student:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+dino:
+  loss_weight: 1.0
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+  koleo_loss_weight: 0.1
+ibot:
+  loss_weight: 1.0
+  mask_sample_probability: 0.5
+  mask_ratio_min_max:
+  - 0.2
+  - 0.75
+  separate_head: true
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+train:
+  batch_size_per_gpu: 64
+  data_min_axis_size: 48
+  dataset_path: /home/jovyan/workspace/3D-DINO/openmind_v2_clean_v2.json
+  output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+  saveckp_freq: 1
+  seed: 0
+  num_workers: 4
+  OFFICIAL_EPOCH_LENGTH: 125
+  cache_dataset: true
+  centering: sinkhorn_knopp
+  cache_dir: ./temp_cache
+student:
+  arch: vit_large_3d
+  patch_size: 16
+  drop_path_rate: 0.3
+  layerscale: 1.0e-05
+  drop_path_uniform: true
+  pretrained_weights: ''
+  full_pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+  ffn_layer: mlp
+  block_chunks: 4
+  qkv_bias: true
+  proj_bias: true
+  ffn_bias: true
+teacher:
+  momentum_teacher: 0.992
+  final_momentum_teacher: 1
+  warmup_teacher_temp: 0.04
+  teacher_temp: 0.07
+  warmup_teacher_temp_epochs: 1500
+optim:
+  epochs: 5000
+  weight_decay: 0.04
+  weight_decay_end: 0.4
+  base_lr: 0.001
+  lr: 0.00025
+  warmup_epochs: 500
+  min_lr: 1.0e-06
+  clip_grad: 3.0
+  freeze_last_layer_epochs: 1
+  scaling_rule: sqrt_wrt_1024
+  patch_embed_lr_mult: 0.2
+  layerwise_decay: 0.9
+  adamw_beta1: 0.9
+  adamw_beta2: 0.999
+crops:
+  global_crops_in_slice_scale:
+  - 0.48
+  - 1.0
+  global_crops_cross_slice_scale:
+  - 0.5
+  - 1.0
+  local_crops_number: 8
+  local_crops_in_slice_scale:
+  - 0.16
+  - 0.48
+  local_crops_cross_slice_scale:
+  - 0.2
+  - 0.5
+  global_crops_size: 112
+  local_crops_size: 64
+evaluation:
+  eval_period_iterations: 3125
+
+I20250829 22:53:22 246572 dinov2 vision_transformer.py:629] using MLP layer as FFN
+W20250829 22:53:42 246572 py.warnings warnings.py:109] /opt/conda/envs/dino3d/lib/python3.9/site-packages/torch/functional.py:507: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3549.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+
+I20250829 22:55:46 252947 dinov2 config.py:61] git:
+  sha: N/A, status: clean, branch: N/A
+
+I20250829 22:55:46 252947 dinov2 config.py:62] arch: vit_large
+cache_dir: ./temp_cache
+config_file: /app/dinov2/configs/train/vit3d_highres.yaml
+jepa_learning: False
+opts: ['train.output_dir=/home/jaume/Desktop/Code/container-validator_dino/temp_output', 'train.cache_dir=./temp_cache']
+output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+patch_size: 16
+pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+I20250829 22:55:46 252947 dinov2 config.py:27] sqrt scaling learning rate; base: 0.001, new: 0.00025
+I20250829 22:55:46 252947 dinov2 config.py:34] MODEL:
+  WEIGHTS: ''
+compute_precision:
+  grad_scaler: true
+  teacher:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+  student:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+dino:
+  loss_weight: 1.0
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+  koleo_loss_weight: 0.1
+ibot:
+  loss_weight: 1.0
+  mask_sample_probability: 0.5
+  mask_ratio_min_max:
+  - 0.2
+  - 0.75
+  separate_head: true
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+train:
+  batch_size_per_gpu: 64
+  data_min_axis_size: 48
+  dataset_path: /home/jovyan/workspace/3D-DINO/openmind_v2_clean_v2.json
+  output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+  saveckp_freq: 1
+  seed: 0
+  num_workers: 4
+  OFFICIAL_EPOCH_LENGTH: 125
+  cache_dataset: true
+  centering: sinkhorn_knopp
+  cache_dir: ./temp_cache
+student:
+  arch: vit_large_3d
+  patch_size: 16
+  drop_path_rate: 0.3
+  layerscale: 1.0e-05
+  drop_path_uniform: true
+  pretrained_weights: ''
+  full_pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+  ffn_layer: mlp
+  block_chunks: 4
+  qkv_bias: true
+  proj_bias: true
+  ffn_bias: true
+teacher:
+  momentum_teacher: 0.992
+  final_momentum_teacher: 1
+  warmup_teacher_temp: 0.04
+  teacher_temp: 0.07
+  warmup_teacher_temp_epochs: 1500
+optim:
+  epochs: 5000
+  weight_decay: 0.04
+  weight_decay_end: 0.4
+  base_lr: 0.001
+  lr: 0.00025
+  warmup_epochs: 500
+  min_lr: 1.0e-06
+  clip_grad: 3.0
+  freeze_last_layer_epochs: 1
+  scaling_rule: sqrt_wrt_1024
+  patch_embed_lr_mult: 0.2
+  layerwise_decay: 0.9
+  adamw_beta1: 0.9
+  adamw_beta2: 0.999
+crops:
+  global_crops_in_slice_scale:
+  - 0.48
+  - 1.0
+  global_crops_cross_slice_scale:
+  - 0.5
+  - 1.0
+  local_crops_number: 8
+  local_crops_in_slice_scale:
+  - 0.16
+  - 0.48
+  local_crops_cross_slice_scale:
+  - 0.2
+  - 0.5
+  global_crops_size: 112
+  local_crops_size: 64
+evaluation:
+  eval_period_iterations: 3125
+
+I20250829 22:55:47 252947 dinov2 vision_transformer.py:629] using MLP layer as FFN
+W20250829 22:56:04 252947 py.warnings warnings.py:109] /opt/conda/envs/dino3d/lib/python3.9/site-packages/torch/functional.py:507: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3549.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+
+I20250829 22:58:19 259391 dinov2 config.py:61] git:
+  sha: N/A, status: clean, branch: N/A
+
+I20250829 22:58:19 259391 dinov2 config.py:62] arch: vit_large
+cache_dir: ./temp_cache
+config_file: /app/dinov2/configs/train/vit3d_highres.yaml
+jepa_learning: False
+opts: ['train.output_dir=/home/jaume/Desktop/Code/container-validator_dino/temp_output', 'train.cache_dir=./temp_cache']
+output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+patch_size: 16
+pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+I20250829 22:58:19 259391 dinov2 config.py:27] sqrt scaling learning rate; base: 0.001, new: 0.00025
+I20250829 22:58:19 259391 dinov2 config.py:34] MODEL:
+  WEIGHTS: ''
+compute_precision:
+  grad_scaler: true
+  teacher:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+  student:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+dino:
+  loss_weight: 1.0
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+  koleo_loss_weight: 0.1
+ibot:
+  loss_weight: 1.0
+  mask_sample_probability: 0.5
+  mask_ratio_min_max:
+  - 0.2
+  - 0.75
+  separate_head: true
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+train:
+  batch_size_per_gpu: 64
+  data_min_axis_size: 48
+  dataset_path: /home/jovyan/workspace/3D-DINO/openmind_v2_clean_v2.json
+  output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+  saveckp_freq: 1
+  seed: 0
+  num_workers: 4
+  OFFICIAL_EPOCH_LENGTH: 125
+  cache_dataset: true
+  centering: sinkhorn_knopp
+  cache_dir: ./temp_cache
+student:
+  arch: vit_large_3d
+  patch_size: 16
+  drop_path_rate: 0.3
+  layerscale: 1.0e-05
+  drop_path_uniform: true
+  pretrained_weights: ''
+  full_pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+  ffn_layer: mlp
+  block_chunks: 4
+  qkv_bias: true
+  proj_bias: true
+  ffn_bias: true
+teacher:
+  momentum_teacher: 0.992
+  final_momentum_teacher: 1
+  warmup_teacher_temp: 0.04
+  teacher_temp: 0.07
+  warmup_teacher_temp_epochs: 1500
+optim:
+  epochs: 5000
+  weight_decay: 0.04
+  weight_decay_end: 0.4
+  base_lr: 0.001
+  lr: 0.00025
+  warmup_epochs: 500
+  min_lr: 1.0e-06
+  clip_grad: 3.0
+  freeze_last_layer_epochs: 1
+  scaling_rule: sqrt_wrt_1024
+  patch_embed_lr_mult: 0.2
+  layerwise_decay: 0.9
+  adamw_beta1: 0.9
+  adamw_beta2: 0.999
+crops:
+  global_crops_in_slice_scale:
+  - 0.48
+  - 1.0
+  global_crops_cross_slice_scale:
+  - 0.5
+  - 1.0
+  local_crops_number: 8
+  local_crops_in_slice_scale:
+  - 0.16
+  - 0.48
+  local_crops_cross_slice_scale:
+  - 0.2
+  - 0.5
+  global_crops_size: 112
+  local_crops_size: 64
+evaluation:
+  eval_period_iterations: 3125
+
+I20250829 22:58:19 259391 dinov2 vision_transformer.py:629] using MLP layer as FFN
+W20250829 22:58:36 259391 py.warnings warnings.py:109] /opt/conda/envs/dino3d/lib/python3.9/site-packages/torch/functional.py:507: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3549.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+
+I20250829 23:00:35 264961 dinov2 config.py:61] git:
+  sha: N/A, status: clean, branch: N/A
+
+I20250829 23:00:35 264961 dinov2 config.py:62] arch: vit_large
+cache_dir: ./temp_cache
+config_file: /app/dinov2/configs/train/vit3d_highres.yaml
+jepa_learning: False
+opts: ['train.output_dir=/home/jaume/Desktop/Code/container-validator_dino/temp_output', 'train.cache_dir=./temp_cache']
+output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+patch_size: 16
+pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+I20250829 23:00:35 264961 dinov2 config.py:27] sqrt scaling learning rate; base: 0.001, new: 0.00025
+I20250829 23:00:35 264961 dinov2 config.py:34] MODEL:
+  WEIGHTS: ''
+compute_precision:
+  grad_scaler: true
+  teacher:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+  student:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+dino:
+  loss_weight: 1.0
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+  koleo_loss_weight: 0.1
+ibot:
+  loss_weight: 1.0
+  mask_sample_probability: 0.5
+  mask_ratio_min_max:
+  - 0.2
+  - 0.75
+  separate_head: true
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+train:
+  batch_size_per_gpu: 64
+  data_min_axis_size: 48
+  dataset_path: /home/jovyan/workspace/3D-DINO/openmind_v2_clean_v2.json
+  output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+  saveckp_freq: 1
+  seed: 0
+  num_workers: 4
+  OFFICIAL_EPOCH_LENGTH: 125
+  cache_dataset: true
+  centering: sinkhorn_knopp
+  cache_dir: ./temp_cache
+student:
+  arch: vit_large_3d
+  patch_size: 16
+  drop_path_rate: 0.3
+  layerscale: 1.0e-05
+  drop_path_uniform: true
+  pretrained_weights: ''
+  full_pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+  ffn_layer: mlp
+  block_chunks: 4
+  qkv_bias: true
+  proj_bias: true
+  ffn_bias: true
+teacher:
+  momentum_teacher: 0.992
+  final_momentum_teacher: 1
+  warmup_teacher_temp: 0.04
+  teacher_temp: 0.07
+  warmup_teacher_temp_epochs: 1500
+optim:
+  epochs: 5000
+  weight_decay: 0.04
+  weight_decay_end: 0.4
+  base_lr: 0.001
+  lr: 0.00025
+  warmup_epochs: 500
+  min_lr: 1.0e-06
+  clip_grad: 3.0
+  freeze_last_layer_epochs: 1
+  scaling_rule: sqrt_wrt_1024
+  patch_embed_lr_mult: 0.2
+  layerwise_decay: 0.9
+  adamw_beta1: 0.9
+  adamw_beta2: 0.999
+crops:
+  global_crops_in_slice_scale:
+  - 0.48
+  - 1.0
+  global_crops_cross_slice_scale:
+  - 0.5
+  - 1.0
+  local_crops_number: 8
+  local_crops_in_slice_scale:
+  - 0.16
+  - 0.48
+  local_crops_cross_slice_scale:
+  - 0.2
+  - 0.5
+  global_crops_size: 112
+  local_crops_size: 64
+evaluation:
+  eval_period_iterations: 3125
+
+I20250829 23:00:35 264961 dinov2 vision_transformer.py:629] using MLP layer as FFN
+W20250829 23:00:53 264961 py.warnings warnings.py:109] /opt/conda/envs/dino3d/lib/python3.9/site-packages/torch/functional.py:507: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3549.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+
+I20250829 23:02:56 270545 dinov2 config.py:61] git:
+  sha: N/A, status: clean, branch: N/A
+
+I20250829 23:02:56 270545 dinov2 config.py:62] arch: vit_large
+cache_dir: ./temp_cache
+config_file: /app/dinov2/configs/train/vit3d_highres.yaml
+jepa_learning: False
+opts: ['train.output_dir=/home/jaume/Desktop/Code/container-validator_dino/temp_output', 'train.cache_dir=./temp_cache']
+output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+patch_size: 16
+pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+I20250829 23:02:56 270545 dinov2 config.py:27] sqrt scaling learning rate; base: 0.001, new: 0.00025
+I20250829 23:02:56 270545 dinov2 config.py:34] MODEL:
+  WEIGHTS: ''
+compute_precision:
+  grad_scaler: true
+  teacher:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+  student:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+dino:
+  loss_weight: 1.0
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+  koleo_loss_weight: 0.1
+ibot:
+  loss_weight: 1.0
+  mask_sample_probability: 0.5
+  mask_ratio_min_max:
+  - 0.2
+  - 0.75
+  separate_head: true
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+train:
+  batch_size_per_gpu: 64
+  data_min_axis_size: 48
+  dataset_path: /home/jovyan/workspace/3D-DINO/openmind_v2_clean_v2.json
+  output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+  saveckp_freq: 1
+  seed: 0
+  num_workers: 4
+  OFFICIAL_EPOCH_LENGTH: 125
+  cache_dataset: true
+  centering: sinkhorn_knopp
+  cache_dir: ./temp_cache
+student:
+  arch: vit_large_3d
+  patch_size: 16
+  drop_path_rate: 0.3
+  layerscale: 1.0e-05
+  drop_path_uniform: true
+  pretrained_weights: ''
+  full_pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+  ffn_layer: mlp
+  block_chunks: 4
+  qkv_bias: true
+  proj_bias: true
+  ffn_bias: true
+teacher:
+  momentum_teacher: 0.992
+  final_momentum_teacher: 1
+  warmup_teacher_temp: 0.04
+  teacher_temp: 0.07
+  warmup_teacher_temp_epochs: 1500
+optim:
+  epochs: 5000
+  weight_decay: 0.04
+  weight_decay_end: 0.4
+  base_lr: 0.001
+  lr: 0.00025
+  warmup_epochs: 500
+  min_lr: 1.0e-06
+  clip_grad: 3.0
+  freeze_last_layer_epochs: 1
+  scaling_rule: sqrt_wrt_1024
+  patch_embed_lr_mult: 0.2
+  layerwise_decay: 0.9
+  adamw_beta1: 0.9
+  adamw_beta2: 0.999
+crops:
+  global_crops_in_slice_scale:
+  - 0.48
+  - 1.0
+  global_crops_cross_slice_scale:
+  - 0.5
+  - 1.0
+  local_crops_number: 8
+  local_crops_in_slice_scale:
+  - 0.16
+  - 0.48
+  local_crops_cross_slice_scale:
+  - 0.2
+  - 0.5
+  global_crops_size: 112
+  local_crops_size: 64
+evaluation:
+  eval_period_iterations: 3125
+
+I20250829 23:02:56 270545 dinov2 vision_transformer.py:629] using MLP layer as FFN
+W20250829 23:03:13 270545 py.warnings warnings.py:109] /opt/conda/envs/dino3d/lib/python3.9/site-packages/torch/functional.py:507: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3549.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+
+I20250829 23:05:19 276635 dinov2 config.py:61] git:
+  sha: N/A, status: clean, branch: N/A
+
+I20250829 23:05:19 276635 dinov2 config.py:62] arch: vit_large
+cache_dir: ./temp_cache
+config_file: /app/dinov2/configs/train/vit3d_highres.yaml
+jepa_learning: False
+opts: ['train.output_dir=/home/jaume/Desktop/Code/container-validator_dino/temp_output', 'train.cache_dir=./temp_cache']
+output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+patch_size: 16
+pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+I20250829 23:05:19 276635 dinov2 config.py:27] sqrt scaling learning rate; base: 0.001, new: 0.00025
+I20250829 23:05:19 276635 dinov2 config.py:34] MODEL:
+  WEIGHTS: ''
+compute_precision:
+  grad_scaler: true
+  teacher:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+  student:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+dino:
+  loss_weight: 1.0
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+  koleo_loss_weight: 0.1
+ibot:
+  loss_weight: 1.0
+  mask_sample_probability: 0.5
+  mask_ratio_min_max:
+  - 0.2
+  - 0.75
+  separate_head: true
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+train:
+  batch_size_per_gpu: 64
+  data_min_axis_size: 48
+  dataset_path: /home/jovyan/workspace/3D-DINO/openmind_v2_clean_v2.json
+  output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+  saveckp_freq: 1
+  seed: 0
+  num_workers: 4
+  OFFICIAL_EPOCH_LENGTH: 125
+  cache_dataset: true
+  centering: sinkhorn_knopp
+  cache_dir: ./temp_cache
+student:
+  arch: vit_large_3d
+  patch_size: 16
+  drop_path_rate: 0.3
+  layerscale: 1.0e-05
+  drop_path_uniform: true
+  pretrained_weights: ''
+  full_pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+  ffn_layer: mlp
+  block_chunks: 4
+  qkv_bias: true
+  proj_bias: true
+  ffn_bias: true
+teacher:
+  momentum_teacher: 0.992
+  final_momentum_teacher: 1
+  warmup_teacher_temp: 0.04
+  teacher_temp: 0.07
+  warmup_teacher_temp_epochs: 1500
+optim:
+  epochs: 5000
+  weight_decay: 0.04
+  weight_decay_end: 0.4
+  base_lr: 0.001
+  lr: 0.00025
+  warmup_epochs: 500
+  min_lr: 1.0e-06
+  clip_grad: 3.0
+  freeze_last_layer_epochs: 1
+  scaling_rule: sqrt_wrt_1024
+  patch_embed_lr_mult: 0.2
+  layerwise_decay: 0.9
+  adamw_beta1: 0.9
+  adamw_beta2: 0.999
+crops:
+  global_crops_in_slice_scale:
+  - 0.48
+  - 1.0
+  global_crops_cross_slice_scale:
+  - 0.5
+  - 1.0
+  local_crops_number: 8
+  local_crops_in_slice_scale:
+  - 0.16
+  - 0.48
+  local_crops_cross_slice_scale:
+  - 0.2
+  - 0.5
+  global_crops_size: 112
+  local_crops_size: 64
+evaluation:
+  eval_period_iterations: 3125
+
+I20250829 23:05:19 276635 dinov2 vision_transformer.py:629] using MLP layer as FFN
+W20250829 23:05:36 276635 py.warnings warnings.py:109] /opt/conda/envs/dino3d/lib/python3.9/site-packages/torch/functional.py:507: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3549.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+
+I20250829 23:07:24 282586 dinov2 config.py:61] git:
+  sha: N/A, status: clean, branch: N/A
+
+I20250829 23:07:24 282586 dinov2 config.py:62] arch: vit_large
+cache_dir: ./temp_cache
+config_file: /app/dinov2/configs/train/vit3d_highres.yaml
+jepa_learning: False
+opts: ['train.output_dir=/home/jaume/Desktop/Code/container-validator_dino/temp_output', 'train.cache_dir=./temp_cache']
+output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+patch_size: 16
+pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+I20250829 23:07:24 282586 dinov2 config.py:27] sqrt scaling learning rate; base: 0.001, new: 0.00025
+I20250829 23:07:24 282586 dinov2 config.py:34] MODEL:
+  WEIGHTS: ''
+compute_precision:
+  grad_scaler: true
+  teacher:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+  student:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+dino:
+  loss_weight: 1.0
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+  koleo_loss_weight: 0.1
+ibot:
+  loss_weight: 1.0
+  mask_sample_probability: 0.5
+  mask_ratio_min_max:
+  - 0.2
+  - 0.75
+  separate_head: true
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+train:
+  batch_size_per_gpu: 64
+  data_min_axis_size: 48
+  dataset_path: /home/jovyan/workspace/3D-DINO/openmind_v2_clean_v2.json
+  output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+  saveckp_freq: 1
+  seed: 0
+  num_workers: 4
+  OFFICIAL_EPOCH_LENGTH: 125
+  cache_dataset: true
+  centering: sinkhorn_knopp
+  cache_dir: ./temp_cache
+student:
+  arch: vit_large_3d
+  patch_size: 16
+  drop_path_rate: 0.3
+  layerscale: 1.0e-05
+  drop_path_uniform: true
+  pretrained_weights: ''
+  full_pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+  ffn_layer: mlp
+  block_chunks: 4
+  qkv_bias: true
+  proj_bias: true
+  ffn_bias: true
+teacher:
+  momentum_teacher: 0.992
+  final_momentum_teacher: 1
+  warmup_teacher_temp: 0.04
+  teacher_temp: 0.07
+  warmup_teacher_temp_epochs: 1500
+optim:
+  epochs: 5000
+  weight_decay: 0.04
+  weight_decay_end: 0.4
+  base_lr: 0.001
+  lr: 0.00025
+  warmup_epochs: 500
+  min_lr: 1.0e-06
+  clip_grad: 3.0
+  freeze_last_layer_epochs: 1
+  scaling_rule: sqrt_wrt_1024
+  patch_embed_lr_mult: 0.2
+  layerwise_decay: 0.9
+  adamw_beta1: 0.9
+  adamw_beta2: 0.999
+crops:
+  global_crops_in_slice_scale:
+  - 0.48
+  - 1.0
+  global_crops_cross_slice_scale:
+  - 0.5
+  - 1.0
+  local_crops_number: 8
+  local_crops_in_slice_scale:
+  - 0.16
+  - 0.48
+  local_crops_cross_slice_scale:
+  - 0.2
+  - 0.5
+  global_crops_size: 112
+  local_crops_size: 64
+evaluation:
+  eval_period_iterations: 3125
+
+I20250829 23:07:24 282586 dinov2 vision_transformer.py:629] using MLP layer as FFN
+W20250829 23:07:41 282586 py.warnings warnings.py:109] /opt/conda/envs/dino3d/lib/python3.9/site-packages/torch/functional.py:507: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3549.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+
+I20250829 23:09:31 287926 dinov2 config.py:61] git:
+  sha: N/A, status: clean, branch: N/A
+
+I20250829 23:09:31 287926 dinov2 config.py:62] arch: vit_large
+cache_dir: ./temp_cache
+config_file: /app/dinov2/configs/train/vit3d_highres.yaml
+jepa_learning: False
+opts: ['train.output_dir=/home/jaume/Desktop/Code/container-validator_dino/temp_output', 'train.cache_dir=./temp_cache']
+output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+patch_size: 16
+pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+I20250829 23:09:31 287926 dinov2 config.py:27] sqrt scaling learning rate; base: 0.001, new: 0.00025
+I20250829 23:09:31 287926 dinov2 config.py:34] MODEL:
+  WEIGHTS: ''
+compute_precision:
+  grad_scaler: true
+  teacher:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+  student:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+dino:
+  loss_weight: 1.0
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+  koleo_loss_weight: 0.1
+ibot:
+  loss_weight: 1.0
+  mask_sample_probability: 0.5
+  mask_ratio_min_max:
+  - 0.2
+  - 0.75
+  separate_head: true
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+train:
+  batch_size_per_gpu: 64
+  data_min_axis_size: 48
+  dataset_path: /home/jovyan/workspace/3D-DINO/openmind_v2_clean_v2.json
+  output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+  saveckp_freq: 1
+  seed: 0
+  num_workers: 4
+  OFFICIAL_EPOCH_LENGTH: 125
+  cache_dataset: true
+  centering: sinkhorn_knopp
+  cache_dir: ./temp_cache
+student:
+  arch: vit_large_3d
+  patch_size: 16
+  drop_path_rate: 0.3
+  layerscale: 1.0e-05
+  drop_path_uniform: true
+  pretrained_weights: ''
+  full_pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+  ffn_layer: mlp
+  block_chunks: 4
+  qkv_bias: true
+  proj_bias: true
+  ffn_bias: true
+teacher:
+  momentum_teacher: 0.992
+  final_momentum_teacher: 1
+  warmup_teacher_temp: 0.04
+  teacher_temp: 0.07
+  warmup_teacher_temp_epochs: 1500
+optim:
+  epochs: 5000
+  weight_decay: 0.04
+  weight_decay_end: 0.4
+  base_lr: 0.001
+  lr: 0.00025
+  warmup_epochs: 500
+  min_lr: 1.0e-06
+  clip_grad: 3.0
+  freeze_last_layer_epochs: 1
+  scaling_rule: sqrt_wrt_1024
+  patch_embed_lr_mult: 0.2
+  layerwise_decay: 0.9
+  adamw_beta1: 0.9
+  adamw_beta2: 0.999
+crops:
+  global_crops_in_slice_scale:
+  - 0.48
+  - 1.0
+  global_crops_cross_slice_scale:
+  - 0.5
+  - 1.0
+  local_crops_number: 8
+  local_crops_in_slice_scale:
+  - 0.16
+  - 0.48
+  local_crops_cross_slice_scale:
+  - 0.2
+  - 0.5
+  global_crops_size: 112
+  local_crops_size: 64
+evaluation:
+  eval_period_iterations: 3125
+
+I20250829 23:09:31 287926 dinov2 vision_transformer.py:629] using MLP layer as FFN
+W20250829 23:09:49 287926 py.warnings warnings.py:109] /opt/conda/envs/dino3d/lib/python3.9/site-packages/torch/functional.py:507: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3549.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+
+I20250829 23:12:04 293853 dinov2 config.py:61] git:
+  sha: N/A, status: clean, branch: N/A
+
+I20250829 23:12:04 293853 dinov2 config.py:62] arch: vit_large
+cache_dir: ./temp_cache
+config_file: /app/dinov2/configs/train/vit3d_highres.yaml
+jepa_learning: False
+opts: ['train.output_dir=/home/jaume/Desktop/Code/container-validator_dino/temp_output', 'train.cache_dir=./temp_cache']
+output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+patch_size: 16
+pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+I20250829 23:12:04 293853 dinov2 config.py:27] sqrt scaling learning rate; base: 0.001, new: 0.00025
+I20250829 23:12:04 293853 dinov2 config.py:34] MODEL:
+  WEIGHTS: ''
+compute_precision:
+  grad_scaler: true
+  teacher:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+  student:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+dino:
+  loss_weight: 1.0
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+  koleo_loss_weight: 0.1
+ibot:
+  loss_weight: 1.0
+  mask_sample_probability: 0.5
+  mask_ratio_min_max:
+  - 0.2
+  - 0.75
+  separate_head: true
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+train:
+  batch_size_per_gpu: 64
+  data_min_axis_size: 48
+  dataset_path: /home/jovyan/workspace/3D-DINO/openmind_v2_clean_v2.json
+  output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+  saveckp_freq: 1
+  seed: 0
+  num_workers: 4
+  OFFICIAL_EPOCH_LENGTH: 125
+  cache_dataset: true
+  centering: sinkhorn_knopp
+  cache_dir: ./temp_cache
+student:
+  arch: vit_large_3d
+  patch_size: 16
+  drop_path_rate: 0.3
+  layerscale: 1.0e-05
+  drop_path_uniform: true
+  pretrained_weights: ''
+  full_pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+  ffn_layer: mlp
+  block_chunks: 4
+  qkv_bias: true
+  proj_bias: true
+  ffn_bias: true
+teacher:
+  momentum_teacher: 0.992
+  final_momentum_teacher: 1
+  warmup_teacher_temp: 0.04
+  teacher_temp: 0.07
+  warmup_teacher_temp_epochs: 1500
+optim:
+  epochs: 5000
+  weight_decay: 0.04
+  weight_decay_end: 0.4
+  base_lr: 0.001
+  lr: 0.00025
+  warmup_epochs: 500
+  min_lr: 1.0e-06
+  clip_grad: 3.0
+  freeze_last_layer_epochs: 1
+  scaling_rule: sqrt_wrt_1024
+  patch_embed_lr_mult: 0.2
+  layerwise_decay: 0.9
+  adamw_beta1: 0.9
+  adamw_beta2: 0.999
+crops:
+  global_crops_in_slice_scale:
+  - 0.48
+  - 1.0
+  global_crops_cross_slice_scale:
+  - 0.5
+  - 1.0
+  local_crops_number: 8
+  local_crops_in_slice_scale:
+  - 0.16
+  - 0.48
+  local_crops_cross_slice_scale:
+  - 0.2
+  - 0.5
+  global_crops_size: 112
+  local_crops_size: 64
+evaluation:
+  eval_period_iterations: 3125
+
+I20250829 23:12:04 293853 dinov2 vision_transformer.py:629] using MLP layer as FFN
+W20250829 23:12:24 293853 py.warnings warnings.py:109] /opt/conda/envs/dino3d/lib/python3.9/site-packages/torch/functional.py:507: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3549.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+
+I20250829 23:14:25 299431 dinov2 config.py:61] git:
+  sha: N/A, status: clean, branch: N/A
+
+I20250829 23:14:25 299431 dinov2 config.py:62] arch: vit_large
+cache_dir: ./temp_cache
+config_file: /app/dinov2/configs/train/vit3d_highres.yaml
+jepa_learning: False
+opts: ['train.output_dir=/home/jaume/Desktop/Code/container-validator_dino/temp_output', 'train.cache_dir=./temp_cache']
+output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+patch_size: 16
+pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+I20250829 23:14:25 299431 dinov2 config.py:27] sqrt scaling learning rate; base: 0.001, new: 0.00025
+I20250829 23:14:25 299431 dinov2 config.py:34] MODEL:
+  WEIGHTS: ''
+compute_precision:
+  grad_scaler: true
+  teacher:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+  student:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+dino:
+  loss_weight: 1.0
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+  koleo_loss_weight: 0.1
+ibot:
+  loss_weight: 1.0
+  mask_sample_probability: 0.5
+  mask_ratio_min_max:
+  - 0.2
+  - 0.75
+  separate_head: true
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+train:
+  batch_size_per_gpu: 64
+  data_min_axis_size: 48
+  dataset_path: /home/jovyan/workspace/3D-DINO/openmind_v2_clean_v2.json
+  output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+  saveckp_freq: 1
+  seed: 0
+  num_workers: 4
+  OFFICIAL_EPOCH_LENGTH: 125
+  cache_dataset: true
+  centering: sinkhorn_knopp
+  cache_dir: ./temp_cache
+student:
+  arch: vit_large_3d
+  patch_size: 16
+  drop_path_rate: 0.3
+  layerscale: 1.0e-05
+  drop_path_uniform: true
+  pretrained_weights: ''
+  full_pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+  ffn_layer: mlp
+  block_chunks: 4
+  qkv_bias: true
+  proj_bias: true
+  ffn_bias: true
+teacher:
+  momentum_teacher: 0.992
+  final_momentum_teacher: 1
+  warmup_teacher_temp: 0.04
+  teacher_temp: 0.07
+  warmup_teacher_temp_epochs: 1500
+optim:
+  epochs: 5000
+  weight_decay: 0.04
+  weight_decay_end: 0.4
+  base_lr: 0.001
+  lr: 0.00025
+  warmup_epochs: 500
+  min_lr: 1.0e-06
+  clip_grad: 3.0
+  freeze_last_layer_epochs: 1
+  scaling_rule: sqrt_wrt_1024
+  patch_embed_lr_mult: 0.2
+  layerwise_decay: 0.9
+  adamw_beta1: 0.9
+  adamw_beta2: 0.999
+crops:
+  global_crops_in_slice_scale:
+  - 0.48
+  - 1.0
+  global_crops_cross_slice_scale:
+  - 0.5
+  - 1.0
+  local_crops_number: 8
+  local_crops_in_slice_scale:
+  - 0.16
+  - 0.48
+  local_crops_cross_slice_scale:
+  - 0.2
+  - 0.5
+  global_crops_size: 112
+  local_crops_size: 64
+evaluation:
+  eval_period_iterations: 3125
+
+I20250829 23:14:25 299431 dinov2 vision_transformer.py:629] using MLP layer as FFN
+W20250829 23:14:45 299431 py.warnings warnings.py:109] /opt/conda/envs/dino3d/lib/python3.9/site-packages/torch/functional.py:507: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3549.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+
+I20250829 23:16:58 305583 dinov2 config.py:61] git:
+  sha: N/A, status: clean, branch: N/A
+
+I20250829 23:16:58 305583 dinov2 config.py:62] arch: vit_large
+cache_dir: ./temp_cache
+config_file: /app/dinov2/configs/train/vit3d_highres.yaml
+jepa_learning: False
+opts: ['train.output_dir=/home/jaume/Desktop/Code/container-validator_dino/temp_output', 'train.cache_dir=./temp_cache']
+output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+patch_size: 16
+pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+I20250829 23:16:58 305583 dinov2 config.py:27] sqrt scaling learning rate; base: 0.001, new: 0.00025
+I20250829 23:16:58 305583 dinov2 config.py:34] MODEL:
+  WEIGHTS: ''
+compute_precision:
+  grad_scaler: true
+  teacher:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+  student:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+dino:
+  loss_weight: 1.0
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+  koleo_loss_weight: 0.1
+ibot:
+  loss_weight: 1.0
+  mask_sample_probability: 0.5
+  mask_ratio_min_max:
+  - 0.2
+  - 0.75
+  separate_head: true
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+train:
+  batch_size_per_gpu: 64
+  data_min_axis_size: 48
+  dataset_path: /home/jovyan/workspace/3D-DINO/openmind_v2_clean_v2.json
+  output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+  saveckp_freq: 1
+  seed: 0
+  num_workers: 4
+  OFFICIAL_EPOCH_LENGTH: 125
+  cache_dataset: true
+  centering: sinkhorn_knopp
+  cache_dir: ./temp_cache
+student:
+  arch: vit_large_3d
+  patch_size: 16
+  drop_path_rate: 0.3
+  layerscale: 1.0e-05
+  drop_path_uniform: true
+  pretrained_weights: ''
+  full_pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+  ffn_layer: mlp
+  block_chunks: 4
+  qkv_bias: true
+  proj_bias: true
+  ffn_bias: true
+teacher:
+  momentum_teacher: 0.992
+  final_momentum_teacher: 1
+  warmup_teacher_temp: 0.04
+  teacher_temp: 0.07
+  warmup_teacher_temp_epochs: 1500
+optim:
+  epochs: 5000
+  weight_decay: 0.04
+  weight_decay_end: 0.4
+  base_lr: 0.001
+  lr: 0.00025
+  warmup_epochs: 500
+  min_lr: 1.0e-06
+  clip_grad: 3.0
+  freeze_last_layer_epochs: 1
+  scaling_rule: sqrt_wrt_1024
+  patch_embed_lr_mult: 0.2
+  layerwise_decay: 0.9
+  adamw_beta1: 0.9
+  adamw_beta2: 0.999
+crops:
+  global_crops_in_slice_scale:
+  - 0.48
+  - 1.0
+  global_crops_cross_slice_scale:
+  - 0.5
+  - 1.0
+  local_crops_number: 8
+  local_crops_in_slice_scale:
+  - 0.16
+  - 0.48
+  local_crops_cross_slice_scale:
+  - 0.2
+  - 0.5
+  global_crops_size: 112
+  local_crops_size: 64
+evaluation:
+  eval_period_iterations: 3125
+
+I20250829 23:16:59 305583 dinov2 vision_transformer.py:629] using MLP layer as FFN
+W20250829 23:17:32 305583 py.warnings warnings.py:109] /opt/conda/envs/dino3d/lib/python3.9/site-packages/torch/functional.py:507: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3549.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+
+I20250829 23:19:41 312286 dinov2 config.py:61] git:
+  sha: N/A, status: clean, branch: N/A
+
+I20250829 23:19:41 312286 dinov2 config.py:62] arch: vit_large
+cache_dir: ./temp_cache
+config_file: /app/dinov2/configs/train/vit3d_highres.yaml
+jepa_learning: False
+opts: ['train.output_dir=/home/jaume/Desktop/Code/container-validator_dino/temp_output', 'train.cache_dir=./temp_cache']
+output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+patch_size: 16
+pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+I20250829 23:19:41 312286 dinov2 config.py:27] sqrt scaling learning rate; base: 0.001, new: 0.00025
+I20250829 23:19:41 312286 dinov2 config.py:34] MODEL:
+  WEIGHTS: ''
+compute_precision:
+  grad_scaler: true
+  teacher:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+  student:
+    backbone:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp16
+        buffer_dtype: fp32
+    dino_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+    ibot_head:
+      sharding_strategy: SHARD_GRAD_OP
+      mixed_precision:
+        param_dtype: fp16
+        reduce_dtype: fp32
+        buffer_dtype: fp32
+dino:
+  loss_weight: 1.0
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+  koleo_loss_weight: 0.1
+ibot:
+  loss_weight: 1.0
+  mask_sample_probability: 0.5
+  mask_ratio_min_max:
+  - 0.2
+  - 0.75
+  separate_head: true
+  head_n_prototypes: 65536
+  head_bottleneck_dim: 256
+  head_nlayers: 3
+  head_hidden_dim: 2048
+train:
+  batch_size_per_gpu: 64
+  data_min_axis_size: 48
+  dataset_path: /home/jovyan/workspace/3D-DINO/openmind_v2_clean_v2.json
+  output_dir: /home/jaume/Desktop/Code/container-validator_dino/temp_output
+  saveckp_freq: 1
+  seed: 0
+  num_workers: 4
+  OFFICIAL_EPOCH_LENGTH: 125
+  cache_dataset: true
+  centering: sinkhorn_knopp
+  cache_dir: ./temp_cache
+student:
+  arch: vit_large_3d
+  patch_size: 16
+  drop_path_rate: 0.3
+  layerscale: 1.0e-05
+  drop_path_uniform: true
+  pretrained_weights: ''
+  full_pretrained_weights: /Benson_DATA2/gerinb/FOMO2025/output/3dino/eval/training_124999/teacher_checkpoint.pth
+  ffn_layer: mlp
+  block_chunks: 4
+  qkv_bias: true
+  proj_bias: true
+  ffn_bias: true
+teacher:
+  momentum_teacher: 0.992
+  final_momentum_teacher: 1
+  warmup_teacher_temp: 0.04
+  teacher_temp: 0.07
+  warmup_teacher_temp_epochs: 1500
+optim:
+  epochs: 5000
+  weight_decay: 0.04
+  weight_decay_end: 0.4
+  base_lr: 0.001
+  lr: 0.00025
+  warmup_epochs: 500
+  min_lr: 1.0e-06
+  clip_grad: 3.0
+  freeze_last_layer_epochs: 1
+  scaling_rule: sqrt_wrt_1024
+  patch_embed_lr_mult: 0.2
+  layerwise_decay: 0.9
+  adamw_beta1: 0.9
+  adamw_beta2: 0.999
+crops:
+  global_crops_in_slice_scale:
+  - 0.48
+  - 1.0
+  global_crops_cross_slice_scale:
+  - 0.5
+  - 1.0
+  local_crops_number: 8
+  local_crops_in_slice_scale:
+  - 0.16
+  - 0.48
+  local_crops_cross_slice_scale:
+  - 0.2
+  - 0.5
+  global_crops_size: 112
+  local_crops_size: 64
+evaluation:
+  eval_period_iterations: 3125
+
+I20250829 23:19:41 312286 dinov2 vision_transformer.py:629] using MLP layer as FFN
+W20250829 23:19:59 312286 py.warnings warnings.py:109] /opt/conda/envs/dino3d/lib/python3.9/site-packages/torch/functional.py:507: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at ../aten/src/ATen/native/TensorShape.cpp:3549.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+

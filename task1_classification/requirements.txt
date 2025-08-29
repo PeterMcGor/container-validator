@@ -1,3 +1,7 @@
 einops>=0.7
 wandb>=0.16.0
 opencv-python>=4.8.0
+#--extra-index-url https://download.pytorch.org/whl/cu121
+#torch==2.2.2+cu121
+#torchvision==0.17.2+cu121
+#xformers>=0.0.18

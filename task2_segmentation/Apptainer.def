@@ -20,7 +20,12 @@ From: python:3.11-slim
     ./requirements.txt /app/requirements.txt
 
     # Copy model [1]    
-    /media/jaume/T7/finetuning_exps/mimic_preprocess/task2/2channels-freeze_DINO_loss2/fold_0 /app/models/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task2/2channels-freeze_DINO_loss2_keepL/fold_0/best_model.pth /app/models/fold_0/best_model.pth
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task2/2channels-freeze_DINO_loss2_keepL/fold_1/best_model.pth /app/models/fold_1/best_model.pth
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task2/2channels-freeze_DINO_loss2_keepL/fold_2/best_model.pth /app/models/fold_2/best_model.pth
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task2/2channels-freeze_DINO_loss2_keepL/fold_3/best_model.pth /app/models/fold_3/best_model.pth
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task2/2channels-freeze_DINO_loss2_keepL/fold_4/best_model.pth /app/models/fold_4/best_model.pth
+    
     #/media/jaume/T7/finetuning_exps/mimic_preprocess/task2/2channels/fold_1_sw_ch /app/models/
     #/media/jaume/T7/finetuning_exps/mimic_preprocess/task2/2channels/fold_2_sw_ch /app/models/
     #/media/jaume/T7/finetuning_exps/mimic_preprocess/task2/2channels/fold_3_sw_ch /app/models/
@@ -72,7 +77,7 @@ From: python:3.11-slim
     # Install requirements directly into that env
     /opt/conda/envs/dino3d/bin/pip install --no-cache-dir -U pip setuptools wheel    
     /opt/conda/envs/dino3d/bin/pip install --no-cache-dir -r /app/requirements.txt
-    /opt/conda/envs/dino3d/bin/pip install --no-cache-dir -r /app/3D-DINO/requirements.txt
+    # /opt/conda/envs/dino3d/bin/pip install --no-cache-dir -r /app/3D-DINO/requirements.txt
 
     # Move dinov2 to the src level or install?
     mv /app/3D-DINO/dinov2 /app/

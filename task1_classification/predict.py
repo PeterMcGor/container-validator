@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 import argparse
 from pathlib import Path
+import numpy as np
 import torch
 import torch.nn.functional as F
 import os
+import joblib
 import json
 import yaml
 from functools import partial
@@ -22,18 +24,29 @@ from dinov2.eval.setup import setup_and_build_model_3d
 
 # Task-specific hardcoded configuration
 predict_config = {
-    # "model_path": "/app/models/Task001_FOMO1/mmunetvae/version_0/checkpoints/best_model.ckpt",
-                #        "/app/models/Task001_FOMO1/mmunetvae/split_1/version_0/checkpoints/best_model.ckpt",
-                #    "/app/models/Task001_FOMO1/mmunetvae/split_2/version_0/checkpoints/best_model.ckpt",
-                #    "/app/models/Task001_FOMO1/mmunetvae/split_3/version_0/checkpoints/best_model.ckpt",
-                #    "/app/models/Task001_FOMO1/mmunetvae/split_4/version_0/checkpoints/best_model.ckpt",
-    "model_list": ["/app/models/fold_0_sw_tf/best_val.pth",
-                   "/app/models/fold_1_sw_tf/best_val.pth",
-                   "/app/models/fold_2_sw_tf/best_val.pth",
-                   "/app/models/fold_3_sw_tf/best_val.pth",
-                   "/app/models/fold_4_sw_tf/best_val.pth",
+    "model_list": ["/app/models/fold_0_sw_ch/best_val.pth",
+                   "/app/models/fold_1_sw_ch/best_val.pth",
+                   "/app/models/fold_2_sw_ch/best_val.pth",
+                   "/app/models/fold_3_sw_ch/best_val.pth",
+                   "/app/models/fold_4_sw_ch/best_val.pth",
                    ],
 }
+
+
+def logits_from_probs(p, eps=1e-12):
+    """Convert probabilities to logits safely"""
+    return np.log(p + eps) - np.log(1 - p + eps)
+
+
+def probs_from_logits(l, T):
+    """Convert logits to probabilities with temperature scaling"""
+    return 1 / (1 + np.exp(-l / T))
+
+
+def apply_temperature(p, T):
+    """Apply temperature scaling to probabilities"""
+    logits = logits_from_probs(p)
+    return probs_from_logits(logits, T)
 
 
 def parse_args():
@@ -216,6 +229,36 @@ def build_regressor_from_ckpt(ckpt_path, feature_model, input_channels):
     return regressor, best_name
 
 
+def robust_ensemble(preds, std_factor=2.0):
+    preds = np.array(preds)
+    mean = preds.mean()
+    std = preds.std()
+
+    mask = np.abs(preds - mean) <= std_factor * std
+    filtered = preds[mask]
+
+    if len(filtered) >= 3:  # keep majority
+        return filtered.mean()
+    else:
+        return np.median(preds)
+    
+
+def platt_calibrate(p_raw, params):
+    a, b = params["a"], params["b"]
+    logit_p = np.log(np.clip(p_raw, 1e-6, 1-1e-6) / (1 - np.clip(p_raw, 1e-6, 1-1e-6)))
+    return 1 / (1 + np.exp(-(a * logit_p + b)))
+
+
+def manual_shift(p, t_opt=0.75):
+    return np.clip(p / t_opt * 0.5, 0, 1)
+
+
+def majority_vote(probs, threshold=0.5):
+    """probs: list or array of fold probabilities for one subject"""
+    votes = (np.array(probs) >= threshold).astype(int)
+    return votes.mean()  # fraction of positives
+
+
 def predict(args):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
@@ -244,7 +287,7 @@ def predict(args):
     feature_model, autocast_ctx = build_model_and_feature_extractor(args, input_channels)
 
     probs = []
-    for ckpt_path in predict_config["model_list"]:
+    for fold_idx, ckpt_path in enumerate(predict_config["model_list"]):
         print(f"[INFO] Loading checkpoint: {ckpt_path}")
         regressor, best_name = build_regressor_from_ckpt(ckpt_path, feature_model, input_channels)
 
@@ -256,17 +299,38 @@ def predict(args):
                 roi=(args.image_size,) * 3,
                 overlap=0.5,
                 sw_bs=1,
-                reduce="max",
+                # reduce="max",
+                reduce="topk",
                 create_linear_input_fn=create_linear_input
             )
 
         logits = output_tokens[best_name]  # [1, num_classes]
-        prob = F.softmax(logits, dim=-1)[0][1].item()
-        print(f"    ↳ Predicted probability: {prob:.3f}")
-        probs.append(prob)
+        p_raw = F.softmax(logits, dim=-1)[0][1].item()        
+        print(f"    ↳ Predicted raw probability: {p_raw:.3f}")
 
-    p_mean = float(torch.tensor(probs).mean().item())
+        # Load calibration params for this fold
+        # cali_path = os.path.join(os.path.dirname(ckpt_path), "calibration_params.pkl")
+        # if os.path.exists(cali_path):
+        #     params = joblib.load(cali_path)
+        #     p_cal = platt_calibrate(p_raw, params)
+        #     print(f"    ↳ Corrected probability (fold {fold_idx}): {p_cal:.3f}")
+        #     probs.append(p_cal)
+        # else:
+        #     print(f"    [WARN] No calibration params found for fold {fold_idx}, using raw pred")            
+        probs.append(p_raw)
+    
+    p_mean = robust_ensemble(probs, std_factor=2.0)
     print(f"[✓] Final ensembled infarct probability: {p_mean:.3f}")
+
+    # Adjust temprature
+    T_opt = 0.0899
+    p_mean = apply_temperature(p_mean, T_opt)
+
+    # Shit the threshold, manual rescaling
+    p_mean = manual_shift(p_mean, t_opt=0.75)
+
+    # p_mean = majority_vote(probs)
+    # print(f"[✓] Final ensembled infarct probability: {p_mean:.3f}")
 
     return p_mean
 

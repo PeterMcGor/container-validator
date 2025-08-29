@@ -20,11 +20,31 @@ From: python:3.11-slim
     ./requirements.txt /app/requirements.txt
 
     # Copy model [1]    
-    /media/jaume/T7/finetuning_exps/mimic_preprocess/task3/2channels/fold_0_sw_ch /app/models/
-    /media/jaume/T7/finetuning_exps/mimic_preprocess/task3/2channels/fold_1_sw_ch /app/models/
-    /media/jaume/T7/finetuning_exps/mimic_preprocess/task3/2channels/fold_2_sw_ch /app/models/
-    /media/jaume/T7/finetuning_exps/mimic_preprocess/task3/2channels/fold_3_sw_ch /app/models/
-    /media/jaume/T7/finetuning_exps/mimic_preprocess/task3/2channels/fold_4_sw_ch /app/models/
+    # /media/jaume/T7/finetuning_exps/mimic_preprocess/task3/2channels/fold_0_sw_tf /app/models/
+    # /media/jaume/T7/finetuning_exps/mimic_preprocess/task3/2channels/fold_1_sw_tf /app/models/
+    # /media/jaume/T7/finetuning_exps/mimic_preprocess/task3/2channels/fold_2_sw_tf /app/models/
+    # /media/jaume/T7/finetuning_exps/mimic_preprocess/task3/2channels/fold_3_sw_tf /app/models/
+    # /media/jaume/T7/finetuning_exps/mimic_preprocess/task3/2channels/fold_4_sw_tf /app/models/
+
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task3/2channels/fold_0_sw_tf/best_val.pth /app/models/fold_0_sw_tf/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task3/2channels/fold_0_sw_tf/results_eval_regression.json /app/models/fold_0_sw_tf/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task3/2channels/fold_0_sw_tf/eval_results/calibration_params.npy /app/models/fold_0_sw_tf/
+
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task3/2channels/fold_1_sw_tf/best_val.pth /app/models/fold_1_sw_tf/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task3/2channels/fold_1_sw_tf/results_eval_regression.json /app/models/fold_1_sw_tf/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task3/2channels/fold_1_sw_tf/eval_results/calibration_params.npy /app/models/fold_1_sw_tf/
+
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task3/2channels/fold_2_sw_tf/best_val.pth /app/models/fold_2_sw_tf/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task3/2channels/fold_2_sw_tf/results_eval_regression.json /app/models/fold_2_sw_tf/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task3/2channels/fold_2_sw_tf/eval_results/calibration_params.npy /app/models/fold_2_sw_tf/
+
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task3/2channels/fold_3_sw_tf/best_val.pth /app/models/fold_3_sw_tf/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task3/2channels/fold_3_sw_tf/results_eval_regression.json /app/models/fold_3_sw_tf/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task3/2channels/fold_3_sw_tf/eval_results/calibration_params.npy /app/models/fold_3_sw_tf/
+
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task3/2channels/fold_4_sw_tf/best_val.pth /app/models/fold_4_sw_tf/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task3/2channels/fold_4_sw_tf/results_eval_regression.json /app/models/fold_4_sw_tf/
+    /media/jaume/T7/finetuning_exps/mimic_preprocess/task3/2channels/fold_4_sw_tf/eval_results/calibration_params.npy /app/models/fold_4_sw_tf/
 
 %post
     # Create necessary directories

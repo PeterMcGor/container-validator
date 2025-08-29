@@ -234,8 +234,8 @@ def prepare_input_images(args):
     # else:
     # 2-channel mode: only FLAIR + DWI
     data_dict = {
-        "image1": args.flair,
-        "image2": args.dwi_b1000
+        "image1": args.dwi_b1000,
+        "image2": args.flair,        
     }
     dataset_type = "2channels"
     print("Using 2-channel mode: FLAIR + DWI")
@@ -537,18 +537,59 @@ def main():
         # Determine input channels based on dataset type
         input_channels = 3 if dataset_type == "3channels" else 2
         print(f"Using {input_channels}-channel input")
+
+        # Step 2: Build the backbone ONCE
+        print("Step 2: Building feature model (once)...")
+        model_args = get_args_parser(add_help=False).parse_args([])
+        model_args.config_file = args.config_file
+        model_args.pretrained_weights = args.pretrained_weights or config.get("student", {}).get("full_pretrained_weights", "")
+        model_args.arch = args.arch
+        model_args.patch_size = args.patch_size
+        model_args.output_dir = "./temp_output"
+        model_args.cache_dir = getattr(args, "cache_dir", "./temp_cache")
+        model_args.opts = []
+        model_args.jepa_learning = False
+        os.makedirs(model_args.cache_dir, exist_ok=True)
+        os.makedirs(model_args.output_dir, exist_ok=True)
+
+        feature_model, autocast_dtype = setup_and_build_model_3d(model_args)
+        autocast_ctx = partial(torch.cuda.amp.autocast, enabled=True, dtype=autocast_dtype)
+
+        # Step 3: Iterate over folds
+        num_classes = 2
+        accum_logits = None   # [B,C,D,H,W] on CPU        
+        for model_path in predict_config['model_list']:            
+            print(f"\n=== Loading fold checkpoint: {model_path} ===")
+            seg_model = ViTAdapterUNETRHead(
+                feature_model,
+                input_channels,
+                args.image_size,
+                num_classes,
+                autocast_ctx,
+                use_cls=args.use_cls,
+            )
+
+            checkpoint = torch.load(model_path, map_location="cpu")
+            seg_model.load_state_dict(checkpoint)
+            seg_model.cuda().eval()
+
+            # Step 4: Run prediction
+            print("Step 4: Running prediction...")
+            predictions, probabilities = run_prediction(seg_model, input_tensor, args)
+            
+            if accum_logits is None:
+                accum_logits = np.copy(probabilities)
+            else:
+                accum_logits += probabilities
+
         
-        # Step 2: Load model
-        print("Step 2: Loading segmentation model...")
-        model = load_segmentation_model(args, input_channels, config)
-        
-        # Step 3: Run prediction
-        print("Step 3: Running prediction...")
-        predictions, probabilities = run_prediction(model, input_tensor, args)
-        
-        # Step 4: Postprocess and save
-        print("Step 4: Postprocessing and saving results...")
-        postprocess_and_save(predictions, reference_img, args.output)
+        # Mean logits
+        mean_logits = accum_logits / len(predict_config["model_list"])   # [B,C,D,H,W]
+        final_preds = np.argmax(mean_logits, axis=1)
+
+        # Step 5: Postprocess and save
+        print("Step 5: Postprocessing and saving results...")
+        postprocess_and_save(final_preds, reference_img, args.output)
         
         print("\n=== Prediction completed successfully! ===")
         

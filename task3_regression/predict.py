@@ -4,6 +4,7 @@ from pathlib import Path
 import torch
 import torch.nn.functional as F
 import os
+import numpy as np
 import json
 import yaml
 from functools import partial
@@ -22,11 +23,11 @@ from dinov2.eval.setup import setup_and_build_model_3d
 
 # Task-specific hardcoded configuration
 predict_config = {
-    "model_list": ["/app/models/fold_0_sw_ch/best_val.pth",
-                   "/app/models/fold_1_sw_ch/best_val.pth",
-                   "/app/models/fold_2_sw_ch/best_val.pth",
-                   "/app/models/fold_3_sw_ch/best_val.pth",
-                   "/app/models/fold_4_sw_ch/best_val.pth",
+    "model_list": ["/app/models/fold_0_sw_tf/best_val.pth",
+                   "/app/models/fold_1_sw_tf/best_val.pth",
+                   "/app/models/fold_2_sw_tf/best_val.pth",
+                   "/app/models/fold_3_sw_tf/best_val.pth",
+                   "/app/models/fold_4_sw_tf/best_val.pth",
                    ],
 }
 
@@ -203,6 +204,26 @@ def build_regressor_from_ckpt(ckpt_path, feature_model, input_channels):
     return regressor, best_name
 
 
+def robust_ensemble(preds, std_factor=2.0):
+    preds = np.array(preds)
+    mean = preds.mean()
+    std = preds.std()
+
+    # Hard filter: drop implausible ages
+    preds = preds[(preds >= 18) & (preds <= 100)]
+    if len(preds) == 0:
+        print("All predictions were filtered out (<18 or >100).")
+        return 50  # Some average age
+
+    mask = np.abs(preds - mean) <= std_factor * std
+    filtered = preds[mask]
+
+    if len(filtered) >= 3:  # keep majority
+        return filtered.mean()
+    else:
+        return np.median(preds)
+    
+
 def predict(args):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
@@ -231,7 +252,7 @@ def predict(args):
     feature_model, autocast_ctx = build_model_and_feature_extractor(args, input_channels)
 
     pred_ages = []           # Age predicted per model
-    for ckpt_path in predict_config["model_list"]:
+    for fold_idx, ckpt_path in enumerate(predict_config["model_list"]):
         print(f"[INFO] Loading checkpoint: {ckpt_path}")
         regressor, best_name = build_regressor_from_ckpt(ckpt_path, feature_model, input_channels)
 
@@ -247,15 +268,28 @@ def predict(args):
                 create_linear_input_fn=create_linear_input
             )
 
-        predictions = output_tokens[best_name]  # [1, num_classes]                
-        pred_age_model = predictions[0, 0]
-        pred_ages.append(pred_age_model)
-        print(f"    ↳ Predicted age: {pred_age_model:.3f}")
-        pred_ages.append(pred_age_model)
+        raw_pred_age = output_tokens[best_name][0, 0].item()
+        print(f"    ↳ Raw predicted age: {raw_pred_age:.3f}")
+
+        # # Load calibration params for this fold
+        # cali_path = os.path.join(os.path.dirname(ckpt_path), "calibration_params.npy")
+        # if os.path.exists(cali_path):
+        #     a, b = np.load(cali_path)
+        #     corrected_age = a + b * raw_pred_age
+        #     print(f"    ↳ Corrected age (fold {fold_idx}): {corrected_age:.3f}  [a={a:.3f}, b={b:.3f}]")
+        #     pred_ages.append(corrected_age)
+        # else:
+        #     print(f"    [WARN] No calibration params found for fold {fold_idx}, using raw pred")
+        pred_ages.append(raw_pred_age)
 
     print(pred_ages)
-    ages_tensor  = torch.tensor(pred_ages)
-    predicted_age = float(ages_tensor.median().item())
+    ages_tensor  = torch.tensor(pred_ages).cpu()
+    # predicted_age = float(ages_tensor.median().item())
+    predicted_age = robust_ensemble(ages_tensor, std_factor=2.0)
+
+    # Correct bias
+    predicted_age = predicted_age * 1.5 - 30
+
     print(f"[✓] Final ensembled age: {predicted_age:.3f}")
 
     return predicted_age

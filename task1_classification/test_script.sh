@@ -1,6 +1,7 @@
 #!/bin/bash
 
 img_path="/media/jaume/DATA/Data/SingularityImagesFOMO_DINO/classification.sif"
+# img_path="/media/jaume/DATA/Data/SingularityImagesFOMO_DINO/classification_dino_em.sif"
 
 subject_id="sub_4"
 input_data="/home/jaume/Desktop/Code/container-validator_dino/fake_data/fomo25/fomo-task1-val/preprocessed/sub_4/ses_1"
